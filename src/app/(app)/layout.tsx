@@ -39,7 +39,7 @@ export default function AuthenticatedAppLayout({
       <AppSidebar />
       <div className="flex flex-col">
         <AppHeader />
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-secondary/30">
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-secondary/30 overflow-y-auto">
           {children}
         </main>
       </div>

@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { SavingTips } from '@/components/dashboard/saving-tips';
-import { SpendingAlerts } from '@/components/dashboard/spending-alerts';
 import type { Expense, UserProfile } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 import { Sparkles } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-
-const MOCK_INCOME_ADVISOR = 3500; // Mock income for advisor page if needed
+import { USER_PROFILE_KEY, EXPENSES_KEY } from '@/lib/types';
 
 export default function AdvisorPage() {
   const { user } = useAuth();
@@ -17,19 +15,38 @@ export default function AdvisorPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    const storedExpenses = localStorage.getItem('finpath_expenses');
+    const storedExpenses = localStorage.getItem(EXPENSES_KEY);
     if (storedExpenses) {
       setExpenses(JSON.parse(storedExpenses));
     }
      if (user) {
-      const profile: UserProfile = {
-        id: user.id,
-        email: user.email,
-        name: user.email.split('@')[0],
-        income: MOCK_INCOME_ADVISOR, // Use mock income or fetch from user profile
-        financialGoals: 'Default goals for advisor page.' // Default or fetched
-      };
-      setUserProfile(profile);
+      const storedProfileStr = localStorage.getItem(USER_PROFILE_KEY);
+      let currentProfile: UserProfile;
+      if (storedProfileStr) {
+        const storedProfile: UserProfile = JSON.parse(storedProfileStr);
+        if (storedProfile.id === user.id) {
+          currentProfile = storedProfile;
+        } else {
+           currentProfile = {
+            id: user.id,
+            email: user.email,
+            name: user.email.split('@')[0],
+            income: undefined, 
+            financialGoals: 'Set your financial goals in Settings.'
+          };
+          localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(currentProfile));
+        }
+      } else {
+         currentProfile = {
+          id: user.id,
+          email: user.email,
+          name: user.email.split('@')[0],
+          income: undefined,
+          financialGoals: 'Set your financial goals in Settings.'
+        };
+        localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(currentProfile));
+      }
+      setUserProfile(currentProfile);
     }
   }, [user]);
 
@@ -41,12 +58,11 @@ export default function AdvisorPage() {
         <h1 className="text-3xl font-bold">AI Financial Advisor</h1>
       </div>
       <p className="text-muted-foreground">
-        Leverage artificial intelligence to get personalized financial insights, saving tips, and spending alerts.
+        Leverage artificial intelligence to get personalized financial insights and saving tips.
       </p>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <SavingTips expenses={expenses} />
-        <SpendingAlerts expenses={expenses} user={userProfile} />
+      <div className="grid gap-6 md:grid-cols-1"> {/* Changed to 1 col as SpendingAlerts is removed */}
+        <SavingTips expenses={expenses} userProfile={userProfile} />
       </div>
       
       <Card className="mt-6 shadow-lg">

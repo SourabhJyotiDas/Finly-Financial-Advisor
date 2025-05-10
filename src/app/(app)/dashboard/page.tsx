@@ -5,14 +5,12 @@ import { FinancialSummaryCard } from '@/components/dashboard/financial-summary-c
 import { ExpenseForm } from '@/components/dashboard/expense-form';
 import { RecentExpenses } from '@/components/dashboard/recent-expenses';
 import { SavingTips } from '@/components/dashboard/saving-tips';
-import { SpendingAlerts } from '@/components/dashboard/spending-alerts';
 import { DollarSign, TrendingDown, PiggyBank, Landmark } from 'lucide-react';
 import type { Expense, UserProfile } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-
-const MOCK_INCOME = 3500; // Mock monthly income
+import { USER_PROFILE_KEY, EXPENSES_KEY } from '@/lib/types';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -20,12 +18,10 @@ export default function DashboardPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    // Load expenses from localStorage or a mock source
-    const storedExpenses = localStorage.getItem('finpath_expenses');
+    const storedExpenses = localStorage.getItem(EXPENSES_KEY);
     if (storedExpenses) {
       setExpenses(JSON.parse(storedExpenses));
     } else {
-      // Initialize with some mock expenses if none are stored for demo purposes
       const mockExpenses: Expense[] = [
         { id: '1', description: 'Groceries', amount: 75.50, category: 'food', date: new Date(Date.now() - 86400000 * 2).toISOString() },
         { id: '2', description: 'Netflix Subscription', amount: 15.99, category: 'entertainment', date: new Date(Date.now() - 86400000 * 5).toISOString() },
@@ -35,21 +31,38 @@ export default function DashboardPage() {
     }
 
     if (user) {
-      // In a real app, fetch profile from a DB. Here, mock it or load from localStorage.
-      const profile: UserProfile = {
-        id: user.id,
-        email: user.email,
-        name: user.email.split('@')[0], // Simple name generation
-        income: MOCK_INCOME,
-        financialGoals: 'Save for a new laptop and build an emergency fund.'
-      };
-      setUserProfile(profile);
+      const storedProfileStr = localStorage.getItem(USER_PROFILE_KEY);
+      let currentProfile: UserProfile;
+      if (storedProfileStr) {
+        const storedProfile: UserProfile = JSON.parse(storedProfileStr);
+        if (storedProfile.id === user.id) {
+          currentProfile = storedProfile;
+        } else {
+          currentProfile = {
+            id: user.id,
+            email: user.email,
+            name: user.email.split('@')[0],
+            income: undefined,
+            financialGoals: 'Set your financial goals in Settings.'
+          };
+          localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(currentProfile));
+        }
+      } else {
+        currentProfile = {
+          id: user.id,
+          email: user.email,
+          name: user.email.split('@')[0],
+          income: undefined,
+          financialGoals: 'Set your financial goals in Settings.'
+        };
+        localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(currentProfile));
+      }
+      setUserProfile(currentProfile);
     }
   }, [user]);
 
   useEffect(() => {
-    // Save expenses to localStorage whenever they change
-    localStorage.setItem('finpath_expenses', JSON.stringify(expenses));
+    localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
   }, [expenses]);
 
   const handleAddExpense = (expense: Expense) => {
@@ -75,7 +88,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <FinancialSummaryCard
           title="Monthly Income"
-          value={userProfile?.income || 0}
+          value={userProfile?.income !== undefined ? userProfile.income : 'Set in Settings'}
           icon={<Landmark className="h-5 w-5" />}
           description="Your estimated monthly earnings."
           className="bg-green-50 dark:bg-green-900/30 border-green-500"
@@ -134,8 +147,7 @@ export default function DashboardPage() {
 
         {/* Column 2: AI Advisor Tools */}
         <div className="lg:col-span-1 space-y-6">
-          <SavingTips expenses={expenses} />
-          <SpendingAlerts expenses={expenses} user={userProfile} />
+          <SavingTips expenses={expenses} userProfile={userProfile} />
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Financial Wellness</CardTitle>

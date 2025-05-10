@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,29 +9,41 @@ import { Textarea } from '@/components/ui/textarea';
 import { getPersonalizedSavingTips, type PersonalizedSavingTipsInput } from '@/ai/flows/personalized-saving-tips';
 import { useToast } from '@/hooks/use-toast';
 import { Lightbulb, Loader2 } from 'lucide-react';
-import type { Expense } from '@/lib/types';
+import type { Expense, UserProfile } from '@/lib/types';
 
 interface SavingTipsProps {
-  expenses: Expense[]; // To calculate total monthly expenses
+  expenses: Expense[];
+  userProfile: UserProfile | null;
 }
 
-export function SavingTips({ expenses }: SavingTipsProps) {
+export function SavingTips({ expenses, userProfile }: SavingTipsProps) {
   const [income, setIncome] = useState<number | undefined>(undefined);
   const [financialGoals, setFinancialGoals] = useState('');
-  const [spendingPatterns, setSpendingPatterns] = useState(''); // Could be auto-derived too
+  const [spendingPatterns, setSpendingPatterns] = useState('');
   const [tips, setTips] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (userProfile) {
+      if (userProfile.income !== undefined) {
+        setIncome(userProfile.income);
+      }
+      if (userProfile.financialGoals) {
+        setFinancialGoals(userProfile.financialGoals);
+      }
+    }
+  }, [userProfile]);
+
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
   const handleGetTips = async () => {
-    if (!income) {
-      toast({ title: 'Income Required', description: 'Please enter your monthly income.', variant: 'destructive' });
+    if (income === undefined || income === null) {
+      toast({ title: 'Income Required', description: 'Please enter your monthly income or set it in your profile.', variant: 'destructive' });
       return;
     }
     if (!financialGoals) {
-      toast({ title: 'Financial Goals Required', description: 'Please describe your financial goals.', variant: 'destructive' });
+      toast({ title: 'Financial Goals Required', description: 'Please describe your financial goals or set them in your profile.', variant: 'destructive' });
       return;
     }
 

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'FinPath - AI Financial Advisor',
-  description: 'Helps users manage budgets, track expenses, and get AI-powered financial advice.',
+  title: 'BudgetNest - AI Financial Advisor',
+  description: 'Helps users manage budgets, track expenses, and get AI-powered financial advice with BudgetNest.',
 };
 
 export default function RootLayout({

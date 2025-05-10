@@ -24,3 +24,7 @@ export interface AISpendingAlert {
   spikeAmount: number;
   message: string;
 }
+
+export const AUTH_KEY = 'budgetnest_auth_user';
+export const EXPENSES_KEY = 'budgetnest_expenses';
+export const USER_PROFILE_KEY = 'budgetnest_user_profile';

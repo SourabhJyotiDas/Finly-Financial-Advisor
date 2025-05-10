@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FinPathLogo } from '@/components/icons/logo';
 import { AppSidebarNav, type NavItem } from './app-sidebar-nav';
-import { LayoutDashboard, ListChecks, Sparkles, UserCircle, LogOut, DollarSign, HandCoins, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, ListChecks, Sparkles, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -11,15 +11,15 @@ const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard /> },
   { href: '/dashboard/expenses', label: 'Expenses', icon: <ListChecks /> },
   { href: '/dashboard/advisor', label: 'AI Advisor', icon: <Sparkles /> },
-  // { href: '/dashboard/profile', label: 'Profile', icon: <UserCircle /> }, // Example for future
+  { href: '/dashboard/settings', label: 'Settings', icon: <Settings /> },
 ];
 
 
 export function AppSidebar() {
   const { logoutUser } = useAuth();
   return (
-    <div className="hidden border-r bg-muted/40 md:block">
-      <div className="flex h-full max-h-screen flex-col gap-2">
+    <div className="hidden md:block sticky top-0 h-screen border-r bg-sidebar">
+      <div className="flex h-full flex-col gap-2">
         <div className="flex h-16 items-center border-b px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <FinPathLogo />

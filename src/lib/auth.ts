@@ -1,7 +1,7 @@
 // Mock authentication functions using localStorage
 // In a real app, this would interact with Firebase or another auth provider.
 
-const AUTH_KEY = 'finpath_auth_user';
+import { AUTH_KEY } from './types';
 
 export interface MockUser {
   id: string;

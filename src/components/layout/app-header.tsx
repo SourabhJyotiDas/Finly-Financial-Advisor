@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { Menu, UserCircle, LogOut, Settings, Sun, Moon } from 'lucide-react';
+import { Menu, UserCircle, LogOut, Settings, Sun, Moon, LayoutDashboard, ListChecks, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FinPathLogo } from '../icons/logo';
@@ -21,8 +21,10 @@ import { AppSidebarNav, type NavItem } from './app-sidebar-nav';
 
 
 const navItems: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: <UserCircle className="h-4 w-4" /> },
-  // Add more mobile nav items if needed
+  { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
+  { href: '/dashboard/expenses', label: 'Expenses', icon: <ListChecks className="h-4 w-4" /> },
+  { href: '/dashboard/advisor', label: 'AI Advisor', icon: <Sparkles className="h-4 w-4" /> },
+  { href: '/dashboard/settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
 ];
 
 
@@ -85,10 +87,12 @@ export function AppHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user?.email || 'My Account'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
+            <Link href="/dashboard/settings" passHref legacyBehavior>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logoutUser()}>
               <LogOut className="mr-2 h-4 w-4" />
