@@ -14,8 +14,18 @@ declare module "next-auth" {
   /**
    * The shape of the user object returned in the OAuth providers' `profile` callback,
    * or the second parameter of the `session` callback, when using a database.
+   * Also used by the `authorize` callback in `CredentialsProvider`.
    */
   interface User extends DefaultUser {
-    // Add any custom properties you expect from your database user model
+    id: string; // Ensure id is always present and is a string
+    hashedPassword?: string; // For users registered with email/password
   }
 }
+
+// This is for the JWT callback, if you use JWT strategy (not used here with 'database' strategy)
+// declare module "next-auth/jwt" {
+//   interface JWT {
+//     id?: string;
+//     hashedPassword?: string;
+//   }
+// }

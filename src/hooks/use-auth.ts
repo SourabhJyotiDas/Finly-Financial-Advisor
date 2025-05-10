@@ -1,33 +1,30 @@
 'use client';
 
-import { useSession, signIn, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation'; // Keep for navigation if needed after actions
+import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
 import type { Session } from 'next-auth';
+// No need for signIn here, as components will call it directly with provider specifics.
 
 interface AuthState {
   session: Session | null;
-  user: Session['user'] | null; // Simplified user object from session
+  user: Session['user'] | null;
   isLoading: boolean; // status === 'loading'
   isAuthenticated: boolean; // status === 'authenticated'
-  login: () => Promise<void>; // Simplified login, triggers Google sign-in
+  // login: () => Promise<void>; // Removed, components will call signIn directly
   logout: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   const isLoading = status === 'loading';
   const isAuthenticated = status === 'authenticated';
 
-  const login = async () => {
-    // Redirects to NextAuth's Google sign-in page
-    // Callback URL can be configured in NextAuth options or here
-    await signIn('google', { callbackUrl: '/dashboard' });
-  };
+  // Login function is removed. Components will call `signIn('google', ...)` or 
+  // `signIn('credentials', { email, password, ... })` directly.
 
   const logout = async () => {
-    await signOut({ callbackUrl: '/login' });
+    // Specify callbackUrl to ensure user is redirected after logout
+    await nextAuthSignOut({ callbackUrl: '/login' });
   };
   
   return { 
@@ -35,7 +32,7 @@ export function useAuth(): AuthState {
     user: session?.user || null,
     isLoading, 
     isAuthenticated,
-    login, 
+    // login, // Removed
     logout 
   };
 }
