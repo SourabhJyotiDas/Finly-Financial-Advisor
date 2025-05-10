@@ -7,7 +7,7 @@ export function FinPathLogo(props: SVGProps<SVGSVGElement>) {
       viewBox="0 0 200 50"
       width="120"
       height="30"
-      aria-label="BudgetNest Logo"
+      aria-label="Finly Logo"
       {...props}
     >
       <style>
@@ -28,7 +28,7 @@ export function FinPathLogo(props: SVGProps<SVGSVGElement>) {
         fill="none"
       />
       <text x="58" y="38" className="logo-text">
-        BudgetNest
+        Finly
       </text>
     </svg>
   );

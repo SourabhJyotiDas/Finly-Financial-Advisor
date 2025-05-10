@@ -26,7 +26,7 @@ export default function HomePage() {
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-10 w-1/2 mx-auto" />
-        <p className="text-center text-muted-foreground">Loading BudgetNest...</p>
+        <p className="text-center text-muted-foreground">Loading Finly...</p>
       </div>
     </div>
   );

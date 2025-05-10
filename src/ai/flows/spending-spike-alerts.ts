@@ -48,10 +48,10 @@ const prompt = ai.definePrompt({
   name: 'spendingSpikeAlertsPrompt',
   input: {schema: SpendingSpikeAlertsInputSchema},
   output: {schema: SpendingSpikeAlertsOutputSchema},
-  prompt: `You are an AI financial advisor specializing in detecting spending spikes for users.
+  prompt: `You are an AI financial advisor specializing in detecting spending spikes for users. All monetary values are in Indian Rupees (₹).
 
   Analyze the user's expenses and identify any unusual spending spikes in specific categories.
-  Provide a clear message describing the spike, the category, and the amount.
+  Provide a clear message describing the spike, the category, and the amount. When mentioning amounts in the message, use the ₹ symbol.
 
   User ID: {{{userId}}}
   Expenses:{{#each expenses}} Category: {{{category}}}, Amount: {{{amount}}}, Date: {{{date}}}{{/each}}

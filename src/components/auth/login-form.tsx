@@ -55,7 +55,7 @@ export function LoginForm() {
     <Card className="shadow-xl">
       <CardHeader>
         <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-        <CardDescription>Enter your email to access your BudgetNest dashboard.</CardDescription>
+        <CardDescription>Enter your email to access your Finly dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

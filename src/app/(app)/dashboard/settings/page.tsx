@@ -105,11 +105,11 @@ export default function SettingsPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="income">Monthly Income ($)</Label>
+            <Label htmlFor="income">Monthly Income (₹)</Label>
             <Input
               id="income"
               type="number"
-              placeholder="e.g., 3500"
+              placeholder="e.g., 50000"
               value={income}
               onChange={handleIncomeChange}
               step="any"

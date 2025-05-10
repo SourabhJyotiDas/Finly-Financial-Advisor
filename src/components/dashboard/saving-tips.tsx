@@ -80,11 +80,11 @@ export function SavingTips({ expenses, userProfile }: SavingTipsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="income">Monthly Income ($)</Label>
+          <Label htmlFor="income">Monthly Income (₹)</Label>
           <Input
             id="income"
             type="number"
-            placeholder="e.g., 3000"
+            placeholder="e.g., 50000"
             value={income === undefined ? '' : income}
             onChange={(e) => setIncome(e.target.value ? parseFloat(e.target.value) : undefined)}
           />

@@ -25,7 +25,7 @@ export function FinancialSummaryCard({
         <div className="text-primary">{icon}</div>
       </CardHeader>
       <CardContent>
-        <div className={cn("text-2xl font-bold", valueClassName)}>{typeof value === 'number' ? `$${value.toLocaleString()}` : value}</div>
+        <div className={cn("text-2xl font-bold", valueClassName)}>{typeof value === 'number' ? `₹${value.toLocaleString('en-IN')}` : value}</div>
         {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </CardContent>
     </Card>

@@ -63,7 +63,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
     onAddExpense(newExpense);
     toast({
       title: 'Expense Added',
-      description: `${values.description} for $${values.amount} added successfully.`,
+      description: `${values.description} for ₹${values.amount.toLocaleString('en-IN')} added successfully.`,
     });
     form.reset();
   }
@@ -90,7 +90,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount ($)</FormLabel>
+                <FormLabel>Amount (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" placeholder="0.00" {...field} />
                 </FormControl>

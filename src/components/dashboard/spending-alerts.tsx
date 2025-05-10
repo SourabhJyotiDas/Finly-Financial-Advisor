@@ -78,7 +78,7 @@ export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Spike in {alert.category}!</AlertTitle>
                 <AlertDescription>
-                  {alert.message} (Spike of ${alert.spikeAmount.toFixed(2)})
+                  {alert.message} (Spike of ₹{alert.spikeAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                 </AlertDescription>
               </Alert>
             ))}

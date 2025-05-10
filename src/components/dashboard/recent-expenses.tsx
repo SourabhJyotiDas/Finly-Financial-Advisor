@@ -77,7 +77,7 @@ export function RecentExpenses({ expenses, onDeleteExpense }: RecentExpensesProp
                 </Badge>
               </TableCell>
               <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
-              <TableCell className="text-right">${expense.amount.toFixed(2)}</TableCell>
+              <TableCell className="text-right">₹{expense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
               <TableCell className="text-right">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

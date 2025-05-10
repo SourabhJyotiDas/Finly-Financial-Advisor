@@ -44,7 +44,7 @@ export function SignupForm() {
     if (user) {
       toast({
         title: 'Signup Successful',
-        description: `Welcome to BudgetNest, ${user.email}!`,
+        description: `Welcome to Finly, ${user.email}!`,
       });
     } else {
       toast({
@@ -59,7 +59,7 @@ export function SignupForm() {
     <Card className="shadow-xl">
       <CardHeader>
         <CardTitle className="text-2xl flex items-center gap-2">
-          <UserPlus className="h-7 w-7 text-primary" /> Create your BudgetNest Account
+          <UserPlus className="h-7 w-7 text-primary" /> Create your Finly Account
         </CardTitle>
         <CardDescription>Start managing your finances effectively today.</CardDescription>
       </CardHeader>

@@ -49,14 +49,14 @@ const prompt = ai.definePrompt({
   name: 'personalizedSavingTipsPrompt',
   input: {schema: PersonalizedSavingTipsInputSchema},
   output: {schema: PersonalizedSavingTipsOutputSchema},
-  prompt: `You are a personal finance advisor. Provide personalized saving tips to the user based on their income, expenses, financial goals, and spending patterns.
+  prompt: `You are a personal finance advisor. Provide personalized saving tips to the user based on their income, expenses, financial goals, and spending patterns. Assume all monetary values are in Indian Rupees (₹).
 
   Income: {{income}}
   Expenses: {{expenses}}
   Financial Goals: {{financialGoals}}
   Spending Patterns: {{spendingPatterns}}
 
-  Provide specific and actionable saving tips tailored to the user's situation. Consider suggesting strategies to reduce expenses, increase income, and allocate funds effectively towards their goals.`,
+  Provide specific and actionable saving tips tailored to the user's situation. Consider suggesting strategies to reduce expenses, increase income, and allocate funds effectively towards their goals. If you mention specific monetary amounts in your tips, use the ₹ symbol.`,
 });
 
 const personalizedSavingTipsFlow = ai.defineFlow(
