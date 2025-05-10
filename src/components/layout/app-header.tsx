@@ -10,12 +10,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils'; // Not used here it seems
 import { Menu, UserCircle, LogOut, Settings, Sun, Moon, LayoutDashboard, ListChecks, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+// import { usePathname } from 'next/navigation'; // Not used here
 import { FinPathLogo } from '../icons/logo';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth'; // Using new useAuth
 import { useState, useEffect } from 'react';
 import { AppSidebarNav, type NavItem } from './app-sidebar-nav';
 
@@ -29,7 +29,7 @@ const navItems: NavItem[] = [
 
 
 export function AppHeader() {
-  const { user, logoutUser } = useAuth();
+  const { user, logout } = useAuth(); // Using new useAuth: user and logout
   const [mounted, setMounted] = useState(false);
   // const { theme, setTheme } = useTheme(); // useTheme not defined, placeholder for theme toggle
 
@@ -41,10 +41,22 @@ export function AppHeader() {
     // setTheme(theme === 'light' ? 'dark' : 'light');
     if (document.documentElement.classList.contains('dark')) {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     } else {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     }
   };
+  
+  // Effect to apply theme from localStorage on mount
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark'); // Default to light
+    }
+  }, []);
 
 
   return (
@@ -57,8 +69,8 @@ export function AppHeader() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col p-0">
-              <div className="p-4 border-b">
+            <SheetContent side="left" className="flex flex-col p-0 bg-sidebar text-sidebar-foreground">
+              <div className="p-4 border-b border-sidebar-border">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
                   <FinPathLogo />
                 </Link>
@@ -74,18 +86,22 @@ export function AppHeader() {
       
       <div className="flex flex-1 items-center justify-end gap-4">
         <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
-          {mounted && (document.documentElement.classList.contains('dark') ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
+          {mounted && (typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
           <span className="sr-only">Toggle Theme</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
-              <UserCircle className="h-5 w-5" />
+              {user?.image ? (
+                <Image src={user.image} alt={user.name || 'User avatar'} width={28} height={28} className="rounded-full" />
+              ) : (
+                <UserCircle className="h-5 w-5" />
+              )}
               <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{user?.email || 'My Account'}</DropdownMenuLabel>
+            <DropdownMenuLabel>{user?.name || user?.email || 'My Account'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <Link href="/dashboard/settings" passHref legacyBehavior>
               <DropdownMenuItem>
@@ -94,7 +110,7 @@ export function AppHeader() {
               </DropdownMenuItem>
             </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logoutUser()}>
+            <DropdownMenuItem onClick={() => logout()}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>

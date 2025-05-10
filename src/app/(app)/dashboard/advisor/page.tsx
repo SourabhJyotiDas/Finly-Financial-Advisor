@@ -1,55 +1,67 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { SavingTips } from '@/components/dashboard/saving-tips';
 import type { Expense, UserProfile } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { USER_PROFILE_KEY, EXPENSES_KEY } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdvisorPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isFetchingData, setIsFetchingData] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsFetchingData(true);
+    try {
+      // Fetch User Profile
+      const profileResponse = await fetch('/api/profile');
+      if (!profileResponse.ok) throw new Error('Failed to fetch profile');
+      const profileData: UserProfile = await profileResponse.json();
+      setUserProfile(profileData);
+
+      // Fetch Expenses
+      const expensesResponse = await fetch('/api/expenses');
+      if (!expensesResponse.ok) throw new Error('Failed to fetch expenses');
+      const expensesData: Expense[] = await expensesResponse.json();
+      setExpenses(expensesData);
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast({ title: 'Error', description: 'Could not load your financial data for the advisor.', variant: 'destructive' });
+    } finally {
+      setIsFetchingData(false);
+    }
+  }, [user, toast]);
 
   useEffect(() => {
-    const storedExpenses = localStorage.getItem(EXPENSES_KEY);
-    if (storedExpenses) {
-      setExpenses(JSON.parse(storedExpenses));
+    if (user && !authLoading) {
+      fetchData();
     }
-     if (user) {
-      const storedProfileStr = localStorage.getItem(USER_PROFILE_KEY);
-      let currentProfile: UserProfile;
-      if (storedProfileStr) {
-        const storedProfile: UserProfile = JSON.parse(storedProfileStr);
-        if (storedProfile.id === user.id) {
-          currentProfile = storedProfile;
-        } else {
-           currentProfile = {
-            id: user.id,
-            email: user.email,
-            name: user.email.split('@')[0],
-            income: undefined, 
-            financialGoals: 'Set your financial goals in Settings.'
-          };
-          localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(currentProfile));
-        }
-      } else {
-         currentProfile = {
-          id: user.id,
-          email: user.email,
-          name: user.email.split('@')[0],
-          income: undefined,
-          financialGoals: 'Set your financial goals in Settings.'
-        };
-        localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(currentProfile));
-      }
-      setUserProfile(currentProfile);
-    }
-  }, [user]);
-
+  }, [user, authLoading, fetchData]);
+  
+  if (authLoading || isFetchingData) {
+    return (
+      <div className="container mx-auto px-0 py-0 space-y-6">
+        <div className="flex items-center gap-4">
+          <Sparkles className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold">AI Financial Advisor</h1>
+        </div>
+        <Card className="shadow-lg">
+           <CardHeader><CardTitle>Loading Advisor Data...</CardTitle></CardHeader>
+           <CardContent className="flex justify-center items-center py-10">
+             <Loader2 className="h-12 w-12 animate-spin text-primary" />
+           </CardContent>
+         </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-0 py-0 space-y-6">
@@ -61,7 +73,7 @@ export default function AdvisorPage() {
         Leverage artificial intelligence to get personalized financial insights and saving tips.
       </p>
 
-      <div className="grid gap-6 md:grid-cols-1"> {/* Changed to 1 col as SpendingAlerts is removed */}
+      <div className="grid gap-6 md:grid-cols-1">
         <SavingTips expenses={expenses} userProfile={userProfile} />
       </div>
       
@@ -81,7 +93,7 @@ export default function AdvisorPage() {
           <div>
             <p className="text-muted-foreground mb-2">
               Our AI analyzes your spending habits, income, and financial goals to provide tailored advice. 
-              The more information you provide and the more consistently you track your expenses, the smarter and more helpful your AI advisor becomes.
+              The more information you provide (especially in Settings) and the more consistently you track your expenses, the smarter and more helpful your AI advisor becomes.
             </p>
             <p className="text-sm text-muted-foreground">
               <strong>Privacy Note:</strong> Your financial data is processed securely. We are committed to protecting your privacy.

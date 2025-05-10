@@ -25,7 +25,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import type { Expense } from '@/lib/types';
+import type { Expense } from '@/lib/types'; // Expense type remains useful for structure
 import { useToast } from '@/hooks/use-toast';
 
 const expenseSchema = z.object({
@@ -37,35 +37,38 @@ const expenseSchema = z.object({
 
 type ExpenseFormValues = z.infer<typeof expenseSchema>;
 
+// onAddExpense will now receive data that needs to be sent to the API (without id/userId)
 interface ExpenseFormProps {
-  onAddExpense: (expense: Expense) => void;
+  onAddExpense: (expenseData: Omit<Expense, 'id' | '_id' | 'userId' | 'createdAt' | 'updatedAt'>) => void;
 }
 
 export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
-  const { toast } = useToast();
+  const { toast } = useToast(); // Toast is already used, just confirming its presence
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       description: '',
-      amount: 0,
+      // amount: 0, // Let placeholder handle this, or set to undefined if coerce handles it well
       category: 'food',
       date: new Date(),
     },
   });
 
   function onSubmit(values: ExpenseFormValues) {
-    const newExpense: Expense = {
-      id: Date.now().toString(),
-      ...values,
+    const expenseDataToSubmit = {
+      description: values.description,
       amount: Number(values.amount), // Ensure amount is number
-      date: values.date.toISOString(),
+      category: values.category,
+      date: values.date.toISOString(), // API expects ISO string
     };
-    onAddExpense(newExpense);
-    toast({
-      title: 'Expense Added',
-      description: `${values.description} for ₹${values.amount.toLocaleString('en-IN')} added successfully.`,
+    onAddExpense(expenseDataToSubmit);
+    // Toasting is now handled by the parent component after successful API call
+    form.reset({
+        description: '',
+        amount: undefined, // Reset amount to undefined or empty string depending on Input behavior
+        category: 'food',
+        date: new Date(),
     });
-    form.reset();
   }
 
   return (
@@ -92,7 +95,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
               <FormItem>
                 <FormLabel>Amount (₹)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                  <Input type="number" step="0.01" placeholder="0.00" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || undefined)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

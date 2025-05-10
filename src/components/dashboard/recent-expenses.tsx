@@ -68,7 +68,8 @@ export function RecentExpenses({ expenses, onDeleteExpense }: RecentExpensesProp
         </TableHeader>
         <TableBody>
           {expenses.slice().sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((expense) => (
-            <TableRow key={expense.id}>
+            // Use _id from MongoDB if available, otherwise fallback to id (client-side generated before save)
+            <TableRow key={expense._id || expense.id}>
               <TableCell className="font-medium">{expense.description}</TableCell>
               <TableCell>
                 <Badge variant="outline" className="flex items-center gap-1.5 w-fit">
@@ -97,7 +98,7 @@ export function RecentExpenses({ expenses, onDeleteExpense }: RecentExpensesProp
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => onDeleteExpense(expense.id)}
+                        onClick={() => onDeleteExpense(expense._id || expense.id!)} // Use _id or id!
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         Delete

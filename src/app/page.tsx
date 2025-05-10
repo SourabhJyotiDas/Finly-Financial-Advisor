@@ -3,21 +3,21 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Skeleton } from '@/components/ui/skeleton'; // For loading state
+import { Skeleton } from '@/components/ui/skeleton'; 
 
 export default function HomePage() {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth(); // Using new useAuth
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
-      if (user) {
+      if (isAuthenticated) {
         router.replace('/dashboard');
       } else {
         router.replace('/login');
       }
     }
-  }, [user, isLoading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">

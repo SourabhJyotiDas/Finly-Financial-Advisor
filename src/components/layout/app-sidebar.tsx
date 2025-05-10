@@ -5,7 +5,7 @@ import { FinPathLogo } from '@/components/icons/logo';
 import { AppSidebarNav, type NavItem } from './app-sidebar-nav';
 import { LayoutDashboard, ListChecks, Sparkles, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth'; // Using new useAuth
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard /> },
@@ -16,11 +16,11 @@ const navItems: NavItem[] = [
 
 
 export function AppSidebar() {
-  const { logoutUser } = useAuth();
+  const { logout } = useAuth(); // Using new useAuth
   return (
-    <div className="hidden md:block sticky top-0 h-screen border-r bg-sidebar">
+    <div className="hidden md:block sticky top-0 h-screen border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-full flex-col gap-2">
-        <div className="flex h-16 items-center border-b px-6">
+        <div className="flex h-16 items-center border-b px-6 border-sidebar-border">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <FinPathLogo />
           </Link>
@@ -28,8 +28,8 @@ export function AppSidebar() {
         <div className="flex-1 overflow-auto py-2">
           <AppSidebarNav items={navItems} />
         </div>
-        <div className="mt-auto p-4 border-t">
-          <Button variant="ghost" className="w-full justify-start" onClick={() => logoutUser()}>
+        <div className="mt-auto p-4 border-t border-sidebar-border">
+          <Button variant="ghost" className="w-full justify-start hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={() => logout()}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>

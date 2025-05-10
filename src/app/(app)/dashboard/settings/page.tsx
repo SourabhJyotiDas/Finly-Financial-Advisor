@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,51 +8,56 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import type { UserProfile } from '@/lib/types';
-import { USER_PROFILE_KEY } from '@/lib/types';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth'; // new useAuth
 import { Settings as SettingsIcon, Loader2 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  
+  const [profile, setProfile] = useState<Partial<UserProfile>>({});
   const [name, setName] = useState<string>('');
   const [income, setIncome] = useState<number | ''>('');
   const [financialGoals, setFinancialGoals] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const [isFetchingProfile, setIsFetchingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      const storedProfileStr = localStorage.getItem(USER_PROFILE_KEY);
-      if (storedProfileStr) {
-        const storedProfile: UserProfile = JSON.parse(storedProfileStr);
-        // Ensure profile belongs to current user or initialize
-        if (storedProfile.id === user.id) {
-          setName(storedProfile.name ?? user.email.split('@')[0]);
-          setIncome(storedProfile.income ?? '');
-          setFinancialGoals(storedProfile.financialGoals ?? '');
-        } else {
-          // Profile mismatch, initialize for current user
-          initializeProfile(user.id, user.email);
-        }
-      } else {
-        // No profile, initialize
-        initializeProfile(user.id, user.email);
+  const fetchUserProfile = useCallback(async () => {
+    if (!user) return;
+    setIsFetchingProfile(true);
+    try {
+      const response = await fetch('/api/profile');
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
       }
+      const data: UserProfile = await response.json();
+      setProfile(data);
+      setName(data.name ?? user.name ?? user.email?.split('@')[0] ?? '');
+      setIncome(data.income ?? '');
+      setFinancialGoals(data.financialGoals ?? '');
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Error', description: 'Could not load your profile data.', variant: 'destructive' });
+      // Initialize with some defaults from session if profile fetch fails
+      setName(user.name ?? user.email?.split('@')[0] ?? '');
+      setIncome('');
+      setFinancialGoals('');
+    } finally {
+      setIsFetchingProfile(false);
+      setIsDirty(false);
     }
-  }, [user]);
+  }, [user, toast]);
 
-  const initializeProfile = (userId: string, userEmail: string) => {
-    const defaultName = userEmail.split('@')[0];
-    setName(defaultName);
-    setIncome('');
-    setFinancialGoals('');
-    // Optionally save this initial profile to localStorage here
-    // or wait for the first save action by the user.
-    // For now, we'll let user explicitly save.
-  };
+  useEffect(() => {
+    if (user && !authLoading) {
+      fetchUserProfile();
+    }
+  }, [user, authLoading, fetchUserProfile]);
 
-  const handleInputChange = <T extends string | number | ''>(setter: React.Dispatch<React.SetStateAction<T>>) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = <T extends string | number | ''>(setter: React.Dispatch<React.SetStateAction<T>>, fieldName?: keyof UserProfile) => 
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setter(e.target.value as T);
     setIsDirty(true);
   };
@@ -62,25 +67,63 @@ export default function SettingsPage() {
     setIsDirty(true);
   };
 
-
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
     if (!user) {
       toast({ title: 'Error', description: 'User not authenticated.', variant: 'destructive' });
       return;
     }
-    setIsLoading(true);
-    const newProfile: UserProfile = {
-      id: user.id,
-      email: user.email,
-      name: name || user.email.split('@')[0],
+    setIsSaving(true);
+    
+    const updatedProfileData: Partial<UserProfile> = {
+      name: name,
       income: typeof income === 'number' ? income : undefined,
       financialGoals: financialGoals,
     };
-    localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(newProfile));
-    toast({ title: 'Settings Saved', description: 'Your profile has been updated.' });
-    setIsLoading(false);
-    setIsDirty(false);
+
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProfileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save settings');
+      }
+      
+      const savedProfile: UserProfile = await response.json();
+      setProfile(savedProfile); // Update local state with saved profile
+      setName(savedProfile.name ?? '');
+      setIncome(savedProfile.income ?? '');
+      setFinancialGoals(savedProfile.financialGoals ?? '');
+
+      toast({ title: 'Settings Saved', description: 'Your profile has been updated.' });
+      setIsDirty(false);
+    } catch (error: any) {
+      console.error(error);
+      toast({ title: 'Error Saving Settings', description: error.message || 'Could not save your profile.', variant: 'destructive' });
+    } finally {
+      setIsSaving(false);
+    }
   };
+  
+  if (authLoading || isFetchingProfile) {
+    return (
+      <div className="container mx-auto px-0 py-0 space-y-6">
+         <div className="flex items-center gap-4">
+           <SettingsIcon className="h-8 w-8 text-primary" />
+           <h1 className="text-3xl font-bold">Settings</h1>
+         </div>
+         <Card className="shadow-lg">
+           <CardHeader><CardTitle>Loading Profile...</CardTitle></CardHeader>
+           <CardContent className="space-y-4">
+             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+           </CardContent>
+         </Card>
+       </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-0 py-0 space-y-6">
@@ -91,7 +134,7 @@ export default function SettingsPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>User Profile</CardTitle>
-          <CardDescription>Manage your personal information and financial settings. Your changes will be saved locally in your browser.</CardDescription>
+          <CardDescription>Manage your personal information and financial settings. Your changes will be saved to your account.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -101,7 +144,7 @@ export default function SettingsPage() {
               type="text"
               placeholder="Your Name"
               value={name}
-              onChange={handleInputChange(setName)}
+              onChange={handleInputChange(setName, 'name')}
             />
           </div>
           <div className="space-y-2">
@@ -121,13 +164,13 @@ export default function SettingsPage() {
               id="financialGoals"
               placeholder="e.g., Save for a vacation, build emergency fund"
               value={financialGoals}
-              onChange={handleInputChange(setFinancialGoals)}
+              onChange={handleInputChange(setFinancialGoals, 'financialGoals')}
               rows={3}
             />
           </div>
-          <Button onClick={handleSaveSettings} disabled={isLoading || !isDirty} className="w-full">
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {isLoading ? 'Saving...' : 'Save Settings'}
+          <Button onClick={handleSaveSettings} disabled={isSaving || !isDirty} className="w-full">
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isSaving ? 'Saving...' : 'Save Settings'}
           </Button>
         </CardContent>
       </Card>

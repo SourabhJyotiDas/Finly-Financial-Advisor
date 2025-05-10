@@ -1,7 +1,7 @@
-'use client'; // This layout needs to be a client component to use useAuth
+'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter }_from 'next/navigation';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { useAuth } from '@/hooks/use-auth';
@@ -12,16 +12,16 @@ export default function AuthenticatedAppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth(); // Using new useAuth
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [user, isLoading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || !user) {
+  if (isLoading || !isAuthenticated || !user) { // Check for user as well
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-4 p-4 w-full max-w-md">

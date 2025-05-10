@@ -12,49 +12,49 @@ import { Lightbulb, Loader2 } from 'lucide-react';
 import type { Expense, UserProfile } from '@/lib/types';
 
 interface SavingTipsProps {
-  expenses: Expense[];
-  userProfile: UserProfile | null;
+  expenses: Expense[]; // Assumed to be fetched by parent
+  userProfile: UserProfile | null; // Assumed to be fetched by parent
 }
 
 export function SavingTips({ expenses, userProfile }: SavingTipsProps) {
   const [income, setIncome] = useState<number | undefined>(undefined);
   const [financialGoals, setFinancialGoals] = useState('');
-  const [spendingPatterns, setSpendingPatterns] = useState('');
+  const [spendingPatterns, setSpendingPatterns] = useState(''); // User can still override/add detail
   const [tips, setTips] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (userProfile) {
-      if (userProfile.income !== undefined) {
-        setIncome(userProfile.income);
-      }
-      if (userProfile.financialGoals) {
-        setFinancialGoals(userProfile.financialGoals);
-      }
+      setIncome(userProfile.income); // Will be undefined if not set
+      setFinancialGoals(userProfile.financialGoals || ''); // Default to empty string if not set
     }
   }, [userProfile]);
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
   const handleGetTips = async () => {
-    if (income === undefined || income === null) {
-      toast({ title: 'Income Required', description: 'Please enter your monthly income or set it in your profile.', variant: 'destructive' });
+    if (income === undefined || income === null || income <= 0) { // Also check for non-positive income
+      toast({ title: 'Valid Income Required', description: 'Please enter your monthly income or set a positive value in your profile settings.', variant: 'destructive' });
       return;
     }
-    if (!financialGoals) {
-      toast({ title: 'Financial Goals Required', description: 'Please describe your financial goals or set them in your profile.', variant: 'destructive' });
+    if (!financialGoals.trim()) {
+      toast({ title: 'Financial Goals Required', description: 'Please describe your financial goals or set them in your profile settings.', variant: 'destructive' });
       return;
     }
 
     setIsLoading(true);
     setTips(null);
 
+    const defaultSpendingPatterns = expenses.length > 0 
+      ? `User spends on categories like ${[...new Set(expenses.map(e => e.category))].join(', ')}.`
+      : 'User has not logged any expenses yet.';
+
     const input: PersonalizedSavingTipsInput = {
       income,
       expenses: totalExpenses,
       financialGoals,
-      spendingPatterns: spendingPatterns || `User spends on categories like ${[...new Set(expenses.map(e => e.category))].join(', ')}.`,
+      spendingPatterns: spendingPatterns.trim() || defaultSpendingPatterns,
     };
 
     try {
@@ -76,36 +76,41 @@ export function SavingTips({ expenses, userProfile }: SavingTipsProps) {
           <Lightbulb className="h-6 w-6 text-accent" />
           AI Powered Saving Tips
         </CardTitle>
-        <CardDescription>Get personalized advice to reach your financial goals faster.</CardDescription>
+        <CardDescription>Get personalized advice to reach your financial goals faster. Ensure your profile income and goals are set in Settings for best results.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="income">Monthly Income (₹)</Label>
+          <Label htmlFor="income">Monthly Income (₹) (from Profile)</Label>
           <Input
             id="income"
             type="number"
-            placeholder="e.g., 50000"
+            placeholder="Set in Profile Settings"
             value={income === undefined ? '' : income}
             onChange={(e) => setIncome(e.target.value ? parseFloat(e.target.value) : undefined)}
+            // readOnly={userProfile?.income !== undefined} // Make it editable here too, or direct to settings
           />
+           {userProfile?.income === undefined && <p className="text-xs text-muted-foreground pt-1">Tip: Set your income in Settings for it to auto-fill here.</p>}
         </div>
         <div>
-          <Label htmlFor="financialGoals">Financial Goals</Label>
+          <Label htmlFor="financialGoals">Financial Goals (from Profile)</Label>
           <Textarea
             id="financialGoals"
-            placeholder="e.g., Save for a vacation, pay off student loans"
+            placeholder="Set in Profile Settings"
             value={financialGoals}
             onChange={(e) => setFinancialGoals(e.target.value)}
+            // readOnly={userProfile?.financialGoals !== undefined && userProfile.financialGoals !== ''}
           />
+          {userProfile?.financialGoals === undefined && <p className="text-xs text-muted-foreground pt-1">Tip: Set your financial goals in Settings for them to auto-fill here.</p>}
         </div>
         <div>
-          <Label htmlFor="spendingPatterns">Optional: Describe Spending Habits</Label>
+          <Label htmlFor="spendingPatterns">Optional: Further Describe Spending Habits</Label>
           <Textarea
             id="spendingPatterns"
-            placeholder="e.g., I tend to overspend on dining out."
+            placeholder="e.g., I tend to overspend on dining out, or trying to reduce subscription costs."
             value={spendingPatterns}
             onChange={(e) => setSpendingPatterns(e.target.value)}
           />
+           <p className="text-xs text-muted-foreground pt-1">If left blank, AI will infer from your expense categories.</p>
         </div>
         
         {tips && (

@@ -1,66 +1,41 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import type { MockUser } from '@/lib/auth';
-import { getAuthenticatedUser, login as apiLogin, logout as apiLogout, signup as apiSignup } from '@/lib/auth';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation'; // Keep for navigation if needed after actions
+import type { Session } from 'next-auth';
 
 interface AuthState {
-  user: MockUser | null;
-  isLoading: boolean;
-  loginUser: (email: string) => Promise<MockUser | null>;
-  signupUser: (email: string) => Promise<MockUser | null>;
-  logoutUser: () => Promise<void>;
+  session: Session | null;
+  user: Session['user'] | null; // Simplified user object from session
+  isLoading: boolean; // status === 'loading'
+  isAuthenticated: boolean; // status === 'authenticated'
+  login: () => Promise<void>; // Simplified login, triggers Google sign-in
+  logout: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
-  const [user, setUser] = useState<MockUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    const currentUser = getAuthenticatedUser();
-    setUser(currentUser);
-    setIsLoading(false);
-  }, []);
+  const isLoading = status === 'loading';
+  const isAuthenticated = status === 'authenticated';
 
-  const loginUser = useCallback(async (email: string): Promise<MockUser | null> => {
-    setIsLoading(true);
-    try {
-      const loggedInUser = apiLogin(email);
-      setUser(loggedInUser);
-      router.push('/dashboard');
-      return loggedInUser;
-    } catch (error) {
-      console.error("Login failed:", error);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
+  const login = async () => {
+    // Redirects to NextAuth's Google sign-in page
+    // Callback URL can be configured in NextAuth options or here
+    await signIn('google', { callbackUrl: '/dashboard' });
+  };
 
-  const signupUser = useCallback(async (email: string): Promise<MockUser | null> => {
-    setIsLoading(true);
-    try {
-      const signedUpUser = apiSignup(email);
-      setUser(signedUpUser);
-      router.push('/dashboard');
-      return signedUpUser;
-    } catch (error) {
-      console.error("Signup failed:", error);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
-  const logoutUser = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    apiLogout();
-    setUser(null);
-    router.push('/login');
-    setIsLoading(false);
-  }, [router]);
+  const logout = async () => {
+    await signOut({ callbackUrl: '/login' });
+  };
   
-  return { user, isLoading, loginUser, signupUser, logoutUser };
+  return { 
+    session, 
+    user: session?.user || null,
+    isLoading, 
+    isAuthenticated,
+    login, 
+    logout 
+  };
 }

@@ -7,11 +7,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { spendingSpikeAlerts, type SpendingSpikeAlertsInput } from '@/ai/flows/spending-spike-alerts';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, BellRing, Loader2 } from 'lucide-react';
-import type { Expense, AISpendingAlert, UserProfile } from '@/lib/types'; // Assuming UserProfile exists
+import type { Expense, AISpendingAlert, UserProfile } from '@/lib/types'; 
 
 interface SpendingAlertsProps {
-  expenses: Expense[];
-  user: UserProfile | null; 
+  expenses: Expense[]; // Assumed to be fetched by parent
+  user: UserProfile | null; // UserProfile from DB, contains userId which links to NextAuth user
 }
 
 export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
@@ -20,12 +20,12 @@ export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
   const { toast } = useToast();
 
   const handleCheckSpikes = async () => {
-    if (!user) {
+    if (!user || !user.userId) { // Check for user and specifically user.userId
       toast({ title: 'User not found', description: 'Cannot check for spikes without user data.', variant: 'destructive'});
       return;
     }
-    if (expenses.length < 5) { // Require some data to analyze
-        toast({ title: 'Not Enough Data', description: 'Please add more expenses to analyze spending spikes.', variant: 'default' });
+    if (expenses.length < 3) { // Adjusted threshold, e.g. 3 expenses
+        toast({ title: 'Not Enough Data', description: 'Please add at least 3 expenses to analyze spending spikes effectively.', variant: 'default' });
         return;
     }
 
@@ -33,7 +33,7 @@ export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
     setAlerts([]);
 
     const input: SpendingSpikeAlertsInput = {
-      userId: user.id,
+      userId: user.userId, // Use userId from UserProfile
       expenses: expenses.map(e => ({ category: e.category, amount: e.amount, date: e.date })),
     };
 
@@ -43,7 +43,7 @@ export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
       if (result.alerts.length > 0) {
         toast({ title: 'Spending Spikes Detected!', description: 'AI has identified unusual spending.', variant: 'destructive' });
       } else {
-        toast({ title: 'No Spikes Found', description: 'Your spending looks normal.' });
+        toast({ title: 'No Spikes Found', description: 'Your spending looks normal based on the provided data.' });
       }
     } catch (error) {
       console.error('Error getting spending alerts:', error);
@@ -60,7 +60,7 @@ export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
           <BellRing className="h-6 w-6 text-primary" />
           Spending Spike Alerts
         </CardTitle>
-        <CardDescription>Let AI warn you about unusual spending patterns.</CardDescription>
+        <CardDescription>Let AI warn you about unusual spending patterns based on your tracked expenses.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button onClick={handleCheckSpikes} disabled={isLoading || expenses.length < 1} className="w-full">
@@ -84,10 +84,12 @@ export function SpendingAlerts({ expenses, user }: SpendingAlertsProps) {
             ))}
           </div>
         )}
-        { !isLoading && alerts.length === 0 && expenses.length > 0 && (
-            <p className="text-sm text-muted-foreground text-center pt-2">No spending spikes detected currently, or click above to analyze.</p>
+        {/* Message when no alerts and not loading */}
+        {!isLoading && alerts.length === 0 && expenses.length > 0 && (
+            <p className="text-sm text-muted-foreground text-center pt-2">No significant spending spikes detected, or click above to analyze.</p>
         )}
-         { expenses.length === 0 && (
+         {/* Message when no expenses logged */}
+         { expenses.length === 0 && !isLoading && (
             <p className="text-sm text-muted-foreground text-center pt-2">Add some expenses first to check for spikes.</p>
         )}
       </CardContent>
