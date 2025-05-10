@@ -1,0 +1,48 @@
+'use client'; // This layout needs to be a client component to use useAuth
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { AppHeader } from '@/components/layout/app-header';
+import { useAuth } from '@/hooks/use-auth';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export default function AuthenticatedAppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="space-y-4 p-4 w-full max-w-md">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <AppSidebar />
+      <div className="flex flex-col">
+        <AppHeader />
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-secondary/30">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
