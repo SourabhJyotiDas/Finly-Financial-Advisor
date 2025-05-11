@@ -13,10 +13,12 @@ export async function GET(req) {
 
   const userId = session.user.id;
 
+  console.log("userId--->",session.user)
+
   try {
     await connectToDatabase();
 
-    let userProfile = await User.findOne({ _id:userId });
+    let userProfile = await User.findOne({ _id: userId });
 
     if (!userProfile) {
       return NextResponse.json({ error: 'User not Found' }, { status: 500 });
@@ -30,13 +32,6 @@ export async function GET(req) {
 }
 
 export async function PUT(req) {
-
-
-  // const updatedProfileData = {
-  //   name: name,
-  //   income: typeof income === 'number' ? income : undefined,
-  //   financialGoals: financialGoals,
-  // };
 
   const session = await getServerSession(authOptions);
 
@@ -61,7 +56,7 @@ export async function PUT(req) {
     if (financialGoals !== undefined) updateData.financialGoals = financialGoals;
 
     const updatedProfile = await User.findOneAndUpdate(
-      { _id:userId },
+      { _id: userId },
       { $set: updateData },
       { new: true, upsert: true }
     );
