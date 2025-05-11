@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { FinancialSummaryCard } from "@/components/dashboard/financial-summary-card";
+import { TotalUsersCard } from "@/components/dashboard/TotalUsersCard";
 import { ExpenseForm } from "@/components/dashboard/expense-form";
 import { RecentExpenses } from "@/components/dashboard/recent-expenses";
 import { SavingTips } from "@/components/dashboard/saving-tips";
@@ -22,6 +23,8 @@ import {
 } from "@/components/ui/card";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import ReviewForm from "@/components/dashboard/review-form";
+import ReviewsList from "@/components/dashboard/reviews";
 
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -216,7 +219,7 @@ export default function DashboardPage() {
                 A quick look at your latest transactions.
               </CardDescription>
             </CardHeader>
-            <CardContent className=" overflow-x-auto w-screen">
+            <CardContent className=" overflow-x-auto w-screen md:w-auto">
               <RecentExpenses
                 expenses={expenses}
                 onDeleteExpense={handleDeleteExpense}
@@ -248,6 +251,10 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+      <TotalUsersCard />
+      <ReviewForm />
+      <ReviewsList />
     </div>
   );
 }
