@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
-import { ObjectId } from 'mongodb';
-
+import User from '@/models/user';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export async function POST(req) {
   try {
@@ -16,41 +15,27 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db();
-    const usersCollection = db.collection('users'); 
-    const userProfilesCollection = db.collection('userProfiles');
+    await connectToDatabase();
 
-    const existingUser = await usersCollection.findOne({ email });
+    const existingUser = await User.findOne({ email });
+
     if (existingUser) {
       return NextResponse.json({ error: 'Email already in use' }, { status: 409 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userName = name || email.split('@')[0];
 
-    const newUserResult = await usersCollection.insertOne({
+    await User.create({
       email,
-      hashedPassword, 
-      name: userName,
-      emailVerified: null, 
-      image: null, 
+      password: hashedPassword,
+      name: name || email.split('@')[0],
+      emailVerified: null,
+      image: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    const newUserId = newUserResult.insertedId.toString();
-
-    const newUserProfile = {
-      userId: newUserId,
-      email,
-      name: userName,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    await userProfilesCollection.insertOne(newUserProfile);
-
-    return NextResponse.json({ message: 'User registered successfully', userId: newUserId }, { status: 201 });
+    return NextResponse.json({ message: 'User registered successfully' }, { status: 201 });
 
   } catch (error) {
     console.error('Registration failed:', error);

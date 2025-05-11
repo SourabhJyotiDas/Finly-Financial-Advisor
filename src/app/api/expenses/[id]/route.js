@@ -1,33 +1,30 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
+import Expense from '@/models/expense';
+import mongoose from 'mongoose';
 
-export async function DELETE(
-  req,
-  { params }
-) {
+export async function DELETE(req, { params }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user || !session.user.id) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   const userId = session.user.id;
   const expenseId = params.id;
 
-  if (!ObjectId.isValid(expenseId)) {
+  if (!mongoose.Types.ObjectId.isValid(expenseId)) {
     return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
   }
 
   try {
-    const client = await clientPromise;
-    const db = client.db();
-    const expensesCollection = db.collection('expenses');
+    await connectToDatabase();
 
-    const result = await expensesCollection.deleteOne({
-      _id: new ObjectId(expenseId),
-      userId: userId, 
+    const result = await Expense.deleteOne({
+      _id: expenseId,
+      userId: userId,
     });
 
     if (result.deletedCount === 0) {
