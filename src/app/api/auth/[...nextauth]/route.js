@@ -6,7 +6,7 @@ import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 
 export const authOptions = {
-  adapter: MongoDBAdapter(clientPromise), // Adapter is still useful for user/account persistence
+  adapter: MongoDBAdapter(clientPromise), 
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
