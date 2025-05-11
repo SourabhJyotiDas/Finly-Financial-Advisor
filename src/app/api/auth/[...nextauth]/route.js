@@ -6,7 +6,7 @@ import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 
 export const authOptions = {
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(clientPromise), // Adapter is still useful for user/account persistence
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -43,6 +43,7 @@ export const authOptions = {
           throw new Error("Incorrect password.");
         }
         
+        // Return user object that will be used in JWT callback
         return {
           id: user._id.toString(), 
           email: user.email,
@@ -53,16 +54,28 @@ export const authOptions = {
     })
   ],
   session: {
-    strategy: 'database',
+    strategy: 'jwt', // Changed from 'database' to 'jwt'
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: '/login',
   },
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async jwt({ token, user, account }) {
+      // The 'user' object is available on initial sign-in
+      // Persist the user ID from the database into the token
+      if (account && user?.id) {
+        token.id = user.id;
+        // token.name, token.email, token.picture are usually populated by default
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // The 'token' object is the decoded JWT from the 'jwt' callback
+      // Assign the user ID from the token to the session.user object
+      if (token?.id && session.user) {
+        session.user.id = token.id;
+        // session.user.name, email, image are typically populated from token by default
       }
       return session;
     },
@@ -80,9 +93,11 @@ export const authOptions = {
             userId: user.id,
             email: user.email,
             name: user.name || user.email.split('@')[0],
+            // Initialize other fields if necessary
           };
           await userProfilesCollection.insertOne(newUserProfile);
         } else if (!userProfile.name && user.name) {
+            // If profile exists but name is missing, update it (e.g. after Google sign-in)
             await userProfilesCollection.updateOne(
                 { userId: user.id },
                 { $set: { name: user.name } }
