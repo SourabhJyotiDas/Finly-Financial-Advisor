@@ -60,7 +60,6 @@ export const authOptions = {
 
   callbacks: {
     async jwt({ token, user, account }) {
-      console.log("-------> jwt comes first",user)
       if (account && user?._id) {
         token.id = user._id;
       }
@@ -69,7 +68,6 @@ export const authOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        console.log("-------> session comes second",session.user)
         await connectToDatabase();
         let user = await User.findOne({ email: session.user?.email });
         session.user.id = user._id
@@ -85,9 +83,6 @@ export const authOptions = {
         const existingUser = await User.findOne({ email: user.email });
 
         if (!existingUser) {
-
-          console.log("existingUser--->", existingUser)
-
           await User.create({
             name: user.name || user.email.split('@')[0],
             email: user.email,

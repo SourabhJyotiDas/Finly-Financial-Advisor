@@ -13,8 +13,6 @@ export async function GET(req) {
 
   const userId = session.user.id;
 
-  console.log("userId--->",session.user)
-
   try {
     await connectToDatabase();
 

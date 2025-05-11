@@ -38,7 +38,6 @@ export default function DashboardPage() {
       const profileResponse = await fetch("/api/profile");
       if (!profileResponse.ok) throw new Error("Failed to fetch profile");
       const profileData = await profileResponse.json();
-      // console.log("profileData--->",profileData)
       setUserProfile(profileData);
 
       // Fetch Expenses
