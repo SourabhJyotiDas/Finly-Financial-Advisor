@@ -141,6 +141,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto px-0 py-0">
+      
       <div className="mb-6 p-6 bg-gradient-to-r from-primary to-teal-600 rounded-lg shadow-xl text-primary-foreground">
         <h1 className="text-3xl font-bold">
           Welcome back, {userProfile?.name || user?.name || user?.email}!
