@@ -15,7 +15,7 @@ export function AppSidebarNav({ items, isMobile = false }) {
   return (
     <nav className={cn("flex flex-col gap-2 px-2 py-4", isMobile ? "grow" : "")}>
       {items.map((item, index) => {
-        const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+        const isActive = pathname === item?.href
         return (
           <Link key={index} href={item.href} legacyBehavior passHref>
             <Button
