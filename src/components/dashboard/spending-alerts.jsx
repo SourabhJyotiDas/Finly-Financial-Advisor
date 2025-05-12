@@ -14,7 +14,7 @@ export function SpendingAlerts({ expenses, user }) {
   const { toast } = useToast();
 
   const handleCheckSpikes = async () => {
-    if (!user || !user.userId) { 
+    if (!user || !user._id) { 
       toast({ title: 'User not found', description: 'Cannot check for spikes without user data.', variant: 'destructive'});
       return;
     }
@@ -27,7 +27,7 @@ export function SpendingAlerts({ expenses, user }) {
     setAlerts([]);
 
     const input = {
-      userId: user.userId, 
+      userId: user._id, 
       expenses: expenses.map(e => ({ category: e.category, amount: e.amount, date: e.date })),
     };
 

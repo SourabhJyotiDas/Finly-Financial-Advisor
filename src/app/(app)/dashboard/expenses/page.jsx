@@ -20,6 +20,7 @@ export default function ExpensesPage() {
   const { toast } = useToast();
   const [expenses, setExpenses] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
+
   const [isFetchingData, setIsFetchingData] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -160,7 +161,7 @@ export default function ExpensesPage() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className=" overflow-x-auto w-screen">
+        <CardContent className=" overflow-x-auto w-screen md:w-auto">
           <RecentExpenses
             expenses={expenses}
             onDeleteExpense={handleDeleteExpense}
