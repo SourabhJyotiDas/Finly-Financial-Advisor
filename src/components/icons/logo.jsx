@@ -1,11 +1,16 @@
+// src/components/icons/logo.jsx
+'use client';
+import { useTranslations } from 'next-intl';
+
 export function FinPathLogo(props) {
+  const t = useTranslations('FinPathLogo');
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 200 50"
       width="120"
       height="30"
-      aria-label="Finly Logo"
+      aria-label={t('altText')}
       {...props}
     >
       <style>

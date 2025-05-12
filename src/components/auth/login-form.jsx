@@ -12,8 +12,10 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Separator } from '../ui/separator';
+import { useTranslations } from 'next-intl';
 
 export function LoginForm() {
+  const t = useTranslations('LoginForm');
   const { isLoading: authIsLoading } = useAuth(); 
   const { toast } = useToast();
   const router = useRouter();
@@ -21,20 +23,22 @@ export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
-    setIsCredentialsLoading(true); 
+    setIsGoogleLoading(true); 
     try {
+      // next-intl middleware handles locale for callbackUrl
       await signIn('google', { callbackUrl: '/dashboard' });
     } catch (error) {
       console.error("Google Sign-In failed", error);
       toast({
-        title: 'Login Failed',
-        description: 'Could not sign in with Google. Please try again.',
+        title: t('loginFailedTitle'),
+        description: t('loginFailedGoogle'),
         variant: 'destructive',
       });
     } finally {
-      setIsCredentialsLoading(false);
+      setIsGoogleLoading(false);
     }
   };
 
@@ -51,20 +55,15 @@ export function LoginForm() {
       if (result?.error) {
         throw new Error(result.error);
       }
-      if (result?.ok && result.url) {
-         router.push('/dashboard'); 
-         toast({ title: 'Login Successful', description: 'Welcome back!' });
-      } else if (result?.ok && !result.url) {
-        router.push('/dashboard');
-        toast({ title: 'Login Successful', description: 'Welcome back!' });
-      } else {
-        throw new Error('An unknown error occurred during login.');
-      }
+      // next-intl middleware handles locale for callbackUrl
+      router.push('/dashboard'); 
+      toast({ title: t('loginSuccessfulTitle'), description: t('loginSuccessfulDescription') });
+      
     } catch (error) {
       console.error("Credentials Sign-In failed", error);
       toast({
-        title: 'Login Failed',
-        description: error.message || 'Invalid email or password. Please try again.',
+        title: t('loginFailedTitle'),
+        description: error.message.includes("No user found") || error.message.includes("Incorrect password") ? t('loginFailedCredentials') : (error.message || t('loginUnknownError')),
         variant: 'destructive',
       });
     } finally {
@@ -72,22 +71,22 @@ export function LoginForm() {
     }
   };
   
-  const isLoading = authIsLoading || isCredentialsLoading;
+  const isLoading = authIsLoading || isCredentialsLoading || isGoogleLoading;
 
   return (
     <Card className="shadow-xl w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-        <CardDescription>Sign in to access your Finly dashboard.</CardDescription>
+        <CardTitle className="text-2xl">{t('welcomeBack')}</CardTitle>
+        <CardDescription>{t('signInToAccess')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleCredentialsSignIn} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('emailLabel')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -95,20 +94,20 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('passwordLabel')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
             <LogIn className="mr-2 h-5 w-5" />
-            {isCredentialsLoading ? 'Signing In...' : 'Sign In'}
+            {isCredentialsLoading ? t('signingInButton') : t('signInButton')}
           </Button>
         </form>
         
@@ -118,21 +117,21 @@ export function LoginForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
+              {t('orContinueWith')}
             </span>
           </div>
         </div>
 
-        <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading}>
+        <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading || isCredentialsLoading}>
           <Chrome className="mr-2 h-5 w-5" />
-          {isCredentialsLoading && !email ? 'Redirecting...' : 'Sign in with Google'}
+          {isGoogleLoading ? t('redirectingGoogle') : t('signInWithGoogle')}
         </Button>
       </CardContent>
       <CardFooter className="text-center text-sm text-muted-foreground">
         <p>
-          Don&apos;t have an account?{' '}
+          {t('dontHaveAccount')}{' '}
           <Link href="/signup" className="font-medium text-primary hover:underline">
-            Sign up
+            {t('signUpLink')}
           </Link>
         </p>
       </CardFooter>
