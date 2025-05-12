@@ -25,26 +25,28 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+// import { useToast } from '@/hooks/use-toast'; // Toast is handled by parent
 import { useState, useEffect } from 'react';
-
-const expenseSchema = z.object({
-  description: z.string().min(1, { message: 'Description is required.' }),
-  amount: z.coerce.number().positive({ message: 'Amount must be positive.' }),
-  category: z.enum(['food', 'rent', 'transport', 'entertainment', 'utilities', 'other']),
-  date: z.date({ required_error: 'Date is required.' }),
-});
-
+import { useTranslations } from 'next-intl';
 
 export function ExpenseForm({ onAddExpense }) {
-  const { toast } = useToast();
+  const t = useTranslations('ExpenseForm');
+  // const { toast } = useToast(); // Parent component (ExpensesPage) handles toast
+
+  const expenseSchema = z.object({
+    description: z.string().min(1, { message: t('validationDescriptionRequired') }),
+    amount: z.coerce.number().positive({ message: t('validationAmountPositive') }),
+    category: z.enum(['food', 'rent', 'transport', 'entertainment', 'utilities', 'other']),
+    date: z.date({ required_error: t('validationDateRequired') }),
+  });
+
   const form = useForm({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       description: '',
-      amount: undefined, // Initialize amount as undefined
+      amount: undefined,
       category: 'food',
-      date: undefined, // Initialize date as undefined for server/client consistency
+      date: undefined,
     },
   });
 
@@ -55,7 +57,6 @@ export function ExpenseForm({ onAddExpense }) {
     setIsClient(true);
     const today = new Date();
     setClientToday(today);
-    // Set client-side default date after hydration only if not already set by user
     if (form.getValues('date') === undefined) {
       form.setValue('date', today, { shouldValidate: false, shouldDirty: false });
     }
@@ -73,9 +74,18 @@ export function ExpenseForm({ onAddExpense }) {
         description: '',
         amount: undefined,
         category: 'food',
-        date: isClient ? new Date() : undefined, // Reset to client's current date if client, else undefined
+        date: isClient ? new Date() : undefined,
     });
   }
+
+  const categories = [
+    { value: 'food', label: t('categories.food') },
+    { value: 'rent', label: t('categories.rent') },
+    { value: 'transport', label: t('categories.transport') },
+    { value: 'entertainment', label: t('categories.entertainment') },
+    { value: 'utilities', label: t('categories.utilities') },
+    { value: 'other', label: t('categories.other') },
+  ];
 
   return (
     <Form {...form}>
@@ -85,9 +95,9 @@ export function ExpenseForm({ onAddExpense }) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t('descriptionLabel')}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Groceries, Coffee" {...field} />
+                <Input placeholder={t('descriptionPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -99,13 +109,12 @@ export function ExpenseForm({ onAddExpense }) {
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount (₹)</FormLabel>
+                <FormLabel>{t('amountLabel')}</FormLabel>
                 <FormControl>
-                  {/* Handle undefined value for controlled input and ensure parseFloat for onChange */}
                   <Input 
                     type="number" 
                     step="0.01" 
-                    placeholder="0.00" 
+                    placeholder={t('amountPlaceholder')} 
                     {...field} 
                     value={field.value === undefined ? '' : field.value}
                     onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} 
@@ -120,20 +129,17 @@ export function ExpenseForm({ onAddExpense }) {
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>{t('categoryLabel')}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} defaultValue="food">
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={t('selectCategoryPlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="food">Food</SelectItem>
-                    <SelectItem value="rent">Rent/Mortgage</SelectItem>
-                    <SelectItem value="transport">Transport</SelectItem>
-                    <SelectItem value="entertainment">Entertainment</SelectItem>
-                    <SelectItem value="utilities">Utilities</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -146,7 +152,7 @@ export function ExpenseForm({ onAddExpense }) {
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
+              <FormLabel>{t('dateLabel')}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -156,16 +162,15 @@ export function ExpenseForm({ onAddExpense }) {
                         'w-full pl-3 text-left font-normal',
                         !field.value && 'text-muted-foreground'
                       )}
-                      disabled={!isClient} // Disable button until client is ready
+                      disabled={!isClient}
                     >
-                      {/* Ensure field.value is a Date object before formatting */}
-                      {field.value instanceof Date ? format(field.value, 'PPP') : (isClient ? <span>Pick a date</span> : <span>Loading date...</span>)}
+                      {field.value instanceof Date ? format(field.value, 'PPP') : (isClient ? <span>{t('pickDate')}</span> : <span>{t('loadingDate')}</span>)}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  {isClient && clientToday ? ( // Conditionally render Calendar
+                  {isClient && clientToday ? (
                     <Calendar
                       mode="single"
                       selected={field.value instanceof Date ? field.value : undefined}
@@ -173,7 +178,7 @@ export function ExpenseForm({ onAddExpense }) {
                       disabled={(date) => date > clientToday || date < new Date('1900-01-01')}
                       initialFocus
                     />
-                  ) : <div className="p-4 text-center text-muted-foreground">Loading calendar...</div> }
+                  ) : <div className="p-4 text-center text-muted-foreground">{t('loadingCalendar')}</div> }
                 </PopoverContent>
               </Popover>
               <FormMessage />
@@ -181,7 +186,7 @@ export function ExpenseForm({ onAddExpense }) {
           )}
         />
         <Button type="submit" className="w-full" disabled={!isClient}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+          <PlusCircle className="mr-2 h-4 w-4" /> {t('addExpenseButton')}
         </Button>
       </form>
     </Form>

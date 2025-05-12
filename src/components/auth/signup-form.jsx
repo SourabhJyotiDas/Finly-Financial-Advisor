@@ -11,8 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export function SignupForm() {
+  const t = useTranslations('SignupForm');
   const { isLoading: authIsLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -21,31 +23,33 @@ export function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
 
   const handleGoogleSignUp = async () => {
-    setIsCredentialsLoading(true);
+    setIsGoogleLoading(true);
     try {
       await signIn('google', { callbackUrl: '/dashboard' });
     } catch (error) {
       console.error("Google Sign-Up failed", error);
       toast({
-        title: 'Signup Failed',
-        description: 'Could not sign up with Google. Please try again.',
+        title: t('signupFailedTitle'),
+        description: t('signupFailedGoogle'),
         variant: 'destructive',
       });
     } finally {
-      setIsCredentialsLoading(false);
+      setIsGoogleLoading(false);
     }
   };
 
   const handleCredentialsSignUp = async (event) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      toast({ title: 'Error', description: 'Passwords do not match.', variant: 'destructive' });
+      toast({ title: 'Error', description: t('passwordsDoNotMatch'), variant: 'destructive' });
       return;
     }
-    setIsCredentialsLoading(true);
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -56,7 +60,7 @@ export function SignupForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to register');
+        throw new Error(data.error || t('registrationFailed'));
       }
 
       const signInResult = await signIn('credentials', {
@@ -66,53 +70,53 @@ export function SignupForm() {
       });
 
       if (signInResult?.error) {
-        toast({ title: 'Registration successful, but login failed', description: signInResult.error, variant: 'destructive' });
+        toast({ title: t('registrationSuccessfulLoginFailed'), description: signInResult.error, variant: 'destructive' });
         router.push('/login'); 
       } else if (signInResult?.ok) {
-        toast({ title: 'Account Created!', description: 'Welcome to Finly! Redirecting to dashboard...' });
+        toast({ title: t('accountCreatedTitle'), description: t('accountCreatedDescription') });
         router.push('/dashboard'); 
       }
     } catch (error) {
       console.error("Credentials Sign-Up failed", error);
       toast({
-        title: 'Signup Failed',
-        description: error.message || 'Could not create your account. Please try again.',
+        title: t('signupFailedTitle'),
+        description: error.message || t('signupFailedGoogle'), // Assuming general error if not specific
         variant: 'destructive',
       });
     } finally {
-      setIsCredentialsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const isLoading = authIsLoading || isCredentialsLoading;
+  const isLoading = authIsLoading || isSubmitting || isGoogleLoading;
 
   return (
     <Card className="shadow-xl w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl flex items-center gap-2">
-          <UserPlus className="h-7 w-7 text-primary" /> Create your Finly Account
+          <UserPlus className="h-7 w-7 text-primary" /> {t('createAccountTitle')}
         </CardTitle>
-        <CardDescription>Join Finly to start managing your finances.</CardDescription>
+        <CardDescription>{t('joinFinlyDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleCredentialsSignUp} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name (Optional)</Label>
+            <Label htmlFor="name">{t('nameLabel')}</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Your Name"
+              placeholder={t('namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="signup-email">Email</Label>
+            <Label htmlFor="signup-email">{t('emailLabel')}</Label>
             <Input
               id="signup-email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -120,11 +124,11 @@ export function SignupForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="signup-password">Password</Label>
+            <Label htmlFor="signup-password">{t('passwordLabel')}</Label>
             <Input
               id="signup-password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -133,11 +137,11 @@ export function SignupForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Label htmlFor="confirm-password">{t('confirmPasswordLabel')}</Label>
             <Input
               id="confirm-password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -147,7 +151,7 @@ export function SignupForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             <UserPlus className="mr-2 h-5 w-5" />
-            {isCredentialsLoading ? 'Creating Account...' : 'Create Account'}
+            {isSubmitting ? t('creatingAccountButton') : t('createAccountButton')}
           </Button>
         </form>
 
@@ -157,21 +161,21 @@ export function SignupForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              Or sign up with
+              {t('orSignUpWith')}
             </span>
           </div>
         </div>
 
         <Button onClick={handleGoogleSignUp} variant="outline" className="w-full" disabled={isLoading}>
           <Chrome className="mr-2 h-5 w-5" />
-          {isCredentialsLoading && !email ? 'Redirecting...' : 'Sign up with Google'}
+          {isGoogleLoading ? t('redirectingGoogle') : t('signUpWithGoogle')}
         </Button>
       </CardContent>
       <CardFooter className="text-center text-sm text-muted-foreground">
         <p>
-          Already have an account?{' '}
+          {t('alreadyHaveAccount')}{' '}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Log in
+            {t('logInLink')}
           </Link>
         </p>
       </CardFooter>

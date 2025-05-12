@@ -16,15 +16,17 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-
-const formSchema = z.object({
-  rating: z.number().min(1, "Please select a rating"),
-  comment: z.string().min(3, "Comment must be at least 3 characters"),
-});
+import { useTranslations } from "next-intl";
 
 export default function ReviewForm() {
+  const t = useTranslations('ReviewForm');
   const { toast } = useToast();
   const [hover, setHover] = useState(0);
+
+  const formSchema = z.object({
+    rating: z.number().min(1, t('validationRatingRequired')),
+    comment: z.string().min(3, t('validationCommentMin')),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -44,14 +46,14 @@ export default function ReviewForm() {
       if (!res.ok) throw new Error("Failed to submit review");
 
       toast({
-        title: "Thank you!",
-        description: "Your review has been submitted.",
+        title: t('successTitle'),
+        description: t('successDescription'),
       });
       form.reset();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong.",
+        title: t('errorTitle'),
+        description: t('errorDescription'),
         variant: "destructive",
       });
     }
@@ -60,10 +62,10 @@ export default function ReviewForm() {
   return (
     <div className="max-w-xl mx-auto mt-10 px-6 py-8 bg-white dark:bg-[#1f1f1f] rounded-2xl shadow-lg">
       <h2 className="text-2xl font-semibold mb-2 text-gray-800 dark:text-white">
-        Leave a Review
+        {t('title')}
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-300 mb-6">
-        Share your experience with us. Your feedback helps us grow!
+        {t('description')}
       </p>
 
       <Form {...form}>
@@ -73,7 +75,7 @@ export default function ReviewForm() {
             name="rating"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base text-gray-700 dark:text-gray-200">Rating</FormLabel>
+                <FormLabel className="text-base text-gray-700 dark:text-gray-200">{t('ratingLabel')}</FormLabel>
                 <FormControl>
                   <div className="flex items-center space-x-2">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -104,10 +106,10 @@ export default function ReviewForm() {
             name="comment"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base text-gray-700 dark:text-gray-200">Comment</FormLabel>
+                <FormLabel className="text-base text-gray-700 dark:text-gray-200">{t('commentLabel')}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Write your honest feedback..."
+                    placeholder={t('commentPlaceholder')}
                     rows={4}
                     className="bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400"
                     {...field}
@@ -122,7 +124,7 @@ export default function ReviewForm() {
             type="submit"
             className="w-full bg-primary text-white hover:bg-primary/90 transition-all duration-150"
           >
-            Submit Review
+            {t('submitButton')}
           </Button>
         </form>
       </Form>
