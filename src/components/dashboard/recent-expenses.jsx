@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Utensils, Home, Car, Ticket, Zap, CircleDollarSign, Trash2 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -22,8 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-
+} from "@/components/ui/alert-dialog";
+import { useTranslations } from 'next-intl';
 
 const categoryIcons = {
   food: <Utensils className="h-4 w-4" />,
@@ -34,18 +33,22 @@ const categoryIcons = {
   other: <CircleDollarSign className="h-4 w-4" />,
 };
 
-const categoryDisplayNames = {
-  food: "Food",
-  rent: "Rent/Mortgage",
-  transport: "Transport",
-  entertainment: "Entertainment",
-  utilities: "Utilities",
-  other: "Other",
-};
-
 export function RecentExpenses({ expenses, onDeleteExpense }) {
+  const t = useTranslations('RecentExpenses');
+  const tCategories = useTranslations('ExpenseForm.categories');
+
+  const categoryDisplayNames = {
+    food: tCategories('food'),
+    rent: tCategories('rent'),
+    transport: tCategories('transport'),
+    entertainment: tCategories('entertainment'),
+    utilities: tCategories('utilities'),
+    other: tCategories('other'),
+  };
+
+
   if (expenses.length === 0) {
-    return <p className="text-muted-foreground text-center py-8">No expenses tracked yet. Add an expense to get started!</p>;
+    return <p className="text-muted-foreground text-center py-8">{t('noExpenses')}</p>;
   }
 
   return (
@@ -54,11 +57,11 @@ export function RecentExpenses({ expenses, onDeleteExpense }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('headerDescription')}</TableHead>
+              <TableHead>{t('headerCategory')}</TableHead>
+              <TableHead>{t('headerDate')}</TableHead>
+              <TableHead className="text-right">{t('headerAmount')}</TableHead>
+              <TableHead className="text-right">{t('headerActions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,7 +74,7 @@ export function RecentExpenses({ expenses, onDeleteExpense }) {
                   <TableCell>
                     <Badge variant="outline" className="flex items-center gap-1.5 w-fit">
                       {categoryIcons[expense.category]}
-                      {categoryDisplayNames[expense.category]}
+                      {categoryDisplayNames[expense.category] || expense.category}
                     </Badge>
                   </TableCell>
                   <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
@@ -86,24 +89,23 @@ export function RecentExpenses({ expenses, onDeleteExpense }) {
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete expense</span>
+                          <span className="sr-only">{t('deleteExpenseSR')}</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogTitle>{t('deleteExpenseAlertTitle')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the expense
-                            "{expense.description}".
+                            {t('deleteExpenseAlertDescription', { description: expense.description })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => onDeleteExpense(expense._id || expense.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Delete
+                            {t('deleteButton')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

@@ -1,25 +1,27 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // Using next/navigation for basic routing
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslations } from 'next-intl';
 
 export default function AuthenticatedAppLayout({
   children,
 }) {
-  const { user, isLoading, isAuthenticated } = useAuth(); 
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const t = useTranslations('AuthenticatedAppLayout');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/login');
+      router.replace('/login'); // next-intl middleware will handle prefixing
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || !isAuthenticated || !user) { 
+  if (isLoading || !isAuthenticated || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-4 p-4 w-full max-w-md">
@@ -27,6 +29,7 @@ export default function AuthenticatedAppLayout({
           <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-8 w-full" />
+          <p className="text-center text-muted-foreground">{t('loadingScreen')}</p>
         </div>
       </div>
     );

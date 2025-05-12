@@ -7,19 +7,26 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { spendingSpikeAlerts } from '@/ai/flows/spending-spike-alerts';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, BellRing, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function SpendingAlerts({ expenses, user }) {
+  const t = useTranslations('SpendingAlerts');
+  const tCategories = useTranslations('ExpenseForm.categories');
   const [alerts, setAlerts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const getCategoryDisplayName = (categoryKey) => {
+    return tCategories(categoryKey.toLowerCase()) || categoryKey;
+  };
+
   const handleCheckSpikes = async () => {
     if (!user || !user._id) { 
-      toast({ title: 'User not found', description: 'Cannot check for spikes without user data.', variant: 'destructive'});
+      toast({ title: t('errorUserNotFound'), description: t('errorUserNotFoundDesc'), variant: 'destructive'});
       return;
     }
     if (expenses.length < 3) { 
-        toast({ title: 'Not Enough Data', description: 'Please add at least 3 expenses to analyze spending spikes effectively.', variant: 'default' });
+        toast({ title: t('errorNotEnoughData'), description: t('errorNotEnoughDataDesc'), variant: 'default' });
         return;
     }
 
@@ -33,15 +40,15 @@ export function SpendingAlerts({ expenses, user }) {
 
     try {
       const result = await spendingSpikeAlerts(input);
-      setAlerts(result.alerts);
+      setAlerts(result.alerts); // AI result, message content might not be translated directly
       if (result.alerts.length > 0) {
-        toast({ title: 'Spending Spikes Detected!', description: 'AI has identified unusual spending.', variant: 'destructive' });
+        toast({ title: t('spikesDetectedTitle'), description: t('spikesDetectedDesc'), variant: 'destructive' });
       } else {
-        toast({ title: 'No Spikes Found', description: 'Your spending looks normal based on the provided data.' });
+        toast({ title: t('noSpikesTitle'), description: t('noSpikesDesc') });
       }
     } catch (error) {
       console.error('Error getting spending alerts:', error);
-      toast({ title: 'Error', description: 'Could not check for spending spikes.', variant: 'destructive' });
+      toast({ title: 'Error', description: t('errorCheckSpikes'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -52,16 +59,16 @@ export function SpendingAlerts({ expenses, user }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BellRing className="h-6 w-6 text-primary" />
-          Spending Spike Alerts
+          {t('cardTitle')}
         </CardTitle>
-        <CardDescription>Let AI warn you about unusual spending patterns based on your tracked expenses.</CardDescription>
+        <CardDescription>{t('cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button onClick={handleCheckSpikes} disabled={isLoading || expenses.length < 1} className="w-full">
           {isLoading ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking for Spikes...</>
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('checkingSpikesButton')}</>
           ) : (
-            'Check for Spending Spikes'
+            t('checkSpikesButton')
           )}
         </Button>
         
@@ -70,19 +77,20 @@ export function SpendingAlerts({ expenses, user }) {
             {alerts.map((alert, index) => (
               <Alert key={index} variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Spike in {alert.category}!</AlertTitle>
+                <AlertTitle>{t('alertSpikeIn', { category: getCategoryDisplayName(alert.category) })}</AlertTitle>
                 <AlertDescription>
-                  {alert.message} (Spike of ₹{alert.spikeAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                  {/* AI message might not be fully translatable here, but we template part of it. */}
+                  {t('alertMessage', { message: alert.message, spikeAmount: alert.spikeAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })}
                 </AlertDescription>
               </Alert>
             ))}
           </div>
         )}
         {!isLoading && alerts.length === 0 && expenses.length > 0 && (
-            <p className="text-sm text-muted-foreground text-center pt-2">No significant spending spikes detected, or click above to analyze.</p>
+            <p className="text-sm text-muted-foreground text-center pt-2">{t('noSpikesOrAnalyze')}</p>
         )}
          { expenses.length === 0 && !isLoading && (
-            <p className="text-sm text-muted-foreground text-center pt-2">Add some expenses first to check for spikes.</p>
+            <p className="text-sm text-muted-foreground text-center pt-2">{t('addExpensesFirst')}</p>
         )}
       </CardContent>
     </Card>
