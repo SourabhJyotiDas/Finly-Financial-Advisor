@@ -55,7 +55,7 @@ export default function ReviewsList() {
           <div className="flex flex-wrap -m-4">
             {reviews.map((review, index) => (
               <div key={index} className="p-4 md:w-1/2 w-full ">
-                <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
+                <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 h-full border-2 border-gray-300 dark:border-teal-300">
                   <p className="leading-relaxed mb-4 text-gray-800 dark:text-white text-base italic">
                     "{review.comment}"
                   </p>
