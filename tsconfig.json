@@ -36,5 +36,5 @@
     "src/ai/genkit.js",
     "src/ai/flows/**/*.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/messages", "src/i18n.js", "src/middleware.js"]
 }

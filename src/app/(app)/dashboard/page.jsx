@@ -25,10 +25,8 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import ReviewForm from "@/components/dashboard/review-form";
 import ReviewsList from "@/components/dashboard/reviews";
-import { useTranslations } from "next-intl";
 
 export default function DashboardPage() {
-  const t = useTranslations("DashboardPage");
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [expenses, setExpenses] = useState([]);
@@ -51,14 +49,14 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
-        title: t("errorFetchingData"),
+        title: "Error fetching data",
         description: error.message,
         variant: "destructive",
       });
     } finally {
       setIsFetchingData(false);
     }
-  }, [user, toast, t]);
+  }, [user, toast]);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -84,14 +82,14 @@ export default function DashboardPage() {
         )
       );
       toast({
-        title: t("expenseAdded"),
-        description: t("expenseAddedDesc", {description: newExpense.description }),
+        title: "Expense Added",
+        description: `${newExpense.description} added.`,
       });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: t("errorAddExpense"),
+        description: "Could not add expense.",
         variant: "destructive",
       });
     }
@@ -110,14 +108,14 @@ export default function DashboardPage() {
         prevExpenses.filter((exp) => (exp._id || exp.id) !== expenseId)
       );
       toast({
-        title: t("expenseDeleted"),
-        description: t("expenseDeletedDesc"),
+        title: "Expense Deleted",
+        description: "Expense removed successfully.",
       });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: t("errorDeleteExpense"),
+        description: "Could not delete expense.",
         variant: "destructive",
       });
     }
@@ -127,7 +125,7 @@ export default function DashboardPage() {
     return (
       <div className="container mx-auto px-0 py-0 flex flex-col items-center justify-center min-h-[calc(100vh-theme(space.32))]">
         <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">{t("loadingDashboard")}</p>
+        <p className="text-muted-foreground">Loading your dashboard...</p>
       </div>
     );
   }
@@ -144,39 +142,39 @@ export default function DashboardPage() {
       
       <div className="mb-6 p-6 bg-gradient-to-r from-primary to-teal-600 rounded-lg shadow-xl text-primary-foreground">
         <h1 className="text-3xl font-bold">
-          {t("welcomeBack", { name: userProfile?.name || user?.name || user?.email })}
+          Welcome back, {userProfile?.name || user?.name || user?.email}!
         </h1>
         <p className="text-teal-100">
-          {t("financialOverview")}
+          Here's your financial overview. Let's make today financially productive!
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <FinancialSummaryCard
-          title={t("monthlyIncome")}
+          title="Monthly Income"
           value={
             userProfile?.income !== undefined
               ? userProfile.income
-              : t("setInSettings")
+              : "Set in Settings"
           }
           icon={<Landmark className="h-5 w-5" />}
-          description={t("monthlyIncomeDesc")}
+          description="Your estimated monthly earnings."
           className="bg-green-50 dark:bg-green-900/30 border-green-500"
           valueClassName="text-green-600 dark:text-green-400"
         />
         <FinancialSummaryCard
-          title={t("totalExpenses")}
+          title="Total Expenses"
           value={totalExpenses}
           icon={<TrendingDown className="h-5 w-5" />}
-          description={t("totalExpensesDesc")}
+          description="Sum of all tracked expenses."
           className="bg-red-50 dark:bg-red-900/30 border-red-500"
           valueClassName="text-red-600 dark:text-red-400"
         />
         <FinancialSummaryCard
-          title={t("netSavings")}
+          title="Net Savings"
           value={savings}
           icon={<DollarSign className="h-5 w-5" />}
-          description={t("netSavingsDesc")}
+          description="Income minus expenses."
           className={
             savings >= 0
               ? "bg-sky-50 dark:bg-sky-900/30 border-sky-500"
@@ -189,10 +187,10 @@ export default function DashboardPage() {
           }
         />
         <FinancialSummaryCard
-          title={t("savingsRate")}
+          title="Savings Rate"
           value={`${savingsRate.toFixed(1)}%`}
           icon={<PiggyBank className="h-5 w-5" />}
-          description={t("savingsRateDesc")}
+          description="Percentage of income saved."
           className="bg-purple-50 dark:bg-purple-900/30 border-purple-500"
           valueClassName="text-purple-600 dark:text-purple-400"
         />
@@ -202,9 +200,9 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>{t("trackNewExpense")}</CardTitle>
+              <CardTitle>Track New Expense</CardTitle>
               <CardDescription>
-                {t("trackNewExpenseDesc")}
+                Log your spending to stay on top of your budget.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -214,9 +212,9 @@ export default function DashboardPage() {
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>{t("recentExpenses")}</CardTitle>
+              <CardTitle>Recent Expenses</CardTitle>
               <CardDescription>
-                {t("recentExpensesDesc")}
+                A quick look at your latest transactions.
               </CardDescription>
             </CardHeader>
             <CardContent className=" overflow-x-auto w-screen md:w-auto">
@@ -232,7 +230,7 @@ export default function DashboardPage() {
           <SavingTips expenses={expenses} userProfile={userProfile} />
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>{t("financialWellness")}</CardTitle>
+              <CardTitle>Financial Wellness</CardTitle>
             </CardHeader>
             <CardContent>
               <Image
@@ -244,7 +242,7 @@ export default function DashboardPage() {
                 className="rounded-md object-cover"
               />
               <p className="mt-4 text-sm text-muted-foreground">
-                {t("financialWellnessDesc")}
+                Stay positive and focused on your financial journey. Small steps lead to big results!
               </p>
             </CardContent>
           </Card>

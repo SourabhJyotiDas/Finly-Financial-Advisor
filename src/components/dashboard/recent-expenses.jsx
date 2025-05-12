@@ -22,7 +22,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useTranslations } from 'next-intl';
 
 const categoryIcons = {
   food: <Utensils className="h-4 w-4" />,
@@ -33,22 +32,20 @@ const categoryIcons = {
   other: <CircleDollarSign className="h-4 w-4" />,
 };
 
+// Duplicating category labels here as we removed next-intl
+const categoryDisplayNames = {
+  food: "Food",
+  rent: "Rent/Mortgage",
+  transport: "Transport",
+  entertainment: "Entertainment",
+  utilities: "Utilities",
+  other: "Other",
+};
+
+
 export function RecentExpenses({ expenses, onDeleteExpense }) {
-  const t = useTranslations('RecentExpenses');
-  const tCategories = useTranslations('ExpenseForm.categories');
-
-  const categoryDisplayNames = {
-    food: tCategories('food'),
-    rent: tCategories('rent'),
-    transport: tCategories('transport'),
-    entertainment: tCategories('entertainment'),
-    utilities: tCategories('utilities'),
-    other: tCategories('other'),
-  };
-
-
   if (expenses.length === 0) {
-    return <p className="text-muted-foreground text-center py-8">{t('noExpenses')}</p>;
+    return <p className="text-muted-foreground text-center py-8">No expenses tracked yet. Add an expense to get started!</p>;
   }
 
   return (
@@ -57,11 +54,11 @@ export function RecentExpenses({ expenses, onDeleteExpense }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('headerDescription')}</TableHead>
-              <TableHead>{t('headerCategory')}</TableHead>
-              <TableHead>{t('headerDate')}</TableHead>
-              <TableHead className="text-right">{t('headerAmount')}</TableHead>
-              <TableHead className="text-right">{t('headerActions')}</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,23 +86,23 @@ export function RecentExpenses({ expenses, onDeleteExpense }) {
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">{t('deleteExpenseSR')}</span>
+                          <span className="sr-only">Delete expense</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>{t('deleteExpenseAlertTitle')}</AlertDialogTitle>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {t('deleteExpenseAlertDescription', { description: expense.description })}
+                            This action cannot be undone. This will permanently delete the expense "{expense.description}".
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => onDeleteExpense(expense._id || expense.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            {t('deleteButton')}
+                            Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

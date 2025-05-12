@@ -11,18 +11,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, UserCircle, LogOut, Settings, Sun, Moon, LayoutDashboard, ListChecks, Sparkles } from 'lucide-react';
-import Link from 'next/link'; // Using next/link for locale-aware navigation
+import Link from 'next/link';
 import Image from 'next/image';
 import { FinPathLogo } from '../icons/logo';
 import { useAuth } from '@/hooks/use-auth'; 
 import { useState, useEffect } from 'react';
 import { AppSidebarNav } from './app-sidebar-nav';
-import { useTranslations } from 'next-intl';
-import { LanguageSwitcher } from './language-switcher';
 
 export function AppHeader() {
-  const t = useTranslations('AppHeader');
-  const tSidebar = useTranslations('AppSidebar'); // For nav items
   const { user, logout } = useAuth(); 
   const [mounted, setMounted] = useState(false);
 
@@ -42,9 +38,9 @@ export function AppHeader() {
     const storedTheme = localStorage.getItem('theme');
     if (storedTheme === 'dark') {
       document.documentElement.classList.add('dark');
-    } else if (storedTheme === 'light') { // Explicitly set light if stored
+    } else if (storedTheme === 'light') { 
       document.documentElement.classList.remove('dark'); 
-    } else { // If no theme stored, use system preference
+    } else { 
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
       } else {
@@ -53,11 +49,12 @@ export function AppHeader() {
     }
   }, []);
 
+  // Hardcoded nav items, previously from tSidebar
   const navItems = [
-    { href: '/dashboard', label: tSidebar('dashboard'), icon: <LayoutDashboard className="h-4 w-4" /> },
-    { href: '/dashboard/expenses', label: tSidebar('expenses'), icon: <ListChecks className="h-4 w-4" /> },
-    { href: '/dashboard/advisor', label: tSidebar('aiAdvisor'), icon: <Sparkles className="h-4 w-4" /> },
-    { href: '/dashboard/settings', label: tSidebar('settings'), icon: <Settings className="h-4 w-4" /> },
+    { href: '/dashboard', label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+    { href: '/dashboard/expenses', label: "Expenses", icon: <ListChecks className="h-4 w-4" /> },
+    { href: '/dashboard/advisor', label: "AI Advisor", icon: <Sparkles className="h-4 w-4" /> },
+    { href: '/dashboard/settings', label: "Settings", icon: <Settings className="h-4 w-4" /> },
   ];
 
   return (
@@ -67,7 +64,7 @@ export function AppHeader() {
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="shrink-0">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">{t('toggleNavigation')}</span>
+                <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0 bg-sidebar text-sidebar-foreground">
@@ -86,10 +83,9 @@ export function AppHeader() {
       </div>
       
       <div className="flex flex-1 items-center justify-end gap-2 sm:gap-4">
-        <LanguageSwitcher />
-        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t('toggleTheme')}>
+        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
           {mounted && (typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
-          <span className="sr-only">{t('toggleTheme')}</span>
+          <span className="sr-only">Toggle theme</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -99,22 +95,22 @@ export function AppHeader() {
               ) : (
                 <UserCircle className="h-5 w-5" />
               )}
-              <span className="sr-only">{t('toggleUserMenu')}</span>
+              <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{user?.name || user?.email || t('myAccount')}</DropdownMenuLabel>
+            <DropdownMenuLabel>{user?.name || user?.email || "My Account"}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <Link href="/dashboard/settings" passHref legacyBehavior>
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>{t('settings')}</span>
+                <span>Settings</span>
               </DropdownMenuItem>
             </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()}>
               <LogOut className="mr-2 h-4 w-4" />
-              <span>{t('logout')}</span>
+              <span>Logout</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

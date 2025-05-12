@@ -7,10 +7,8 @@ import { Sparkles, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslations } from 'next-intl';
 
 export default function AdvisorPage() {
-  const t = useTranslations('AdvisorPage');
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [expenses, setExpenses] = useState([]);
@@ -33,11 +31,11 @@ export default function AdvisorPage() {
 
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast({ title: 'Error', description: t('errorLoadingAdvisor'), variant: 'destructive' });
+      toast({ title: 'Error', description: "Could not load your financial data for the advisor.", variant: 'destructive' });
     } finally {
       setIsFetchingData(false);
     }
-  }, [user, toast, t]);
+  }, [user, toast]);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -50,10 +48,10 @@ export default function AdvisorPage() {
       <div className="container mx-auto px-0 py-0 space-y-6">
         <div className="flex items-center gap-4">
           <Sparkles className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">{t('aiFinancialAdvisor')}</h1>
+          <h1 className="text-3xl font-bold">AI Financial Advisor</h1>
         </div>
         <Card className="shadow-lg">
-           <CardHeader><CardTitle>{t('loadingAdvisorData')}</CardTitle></CardHeader>
+           <CardHeader><CardTitle>Loading Advisor Data...</CardTitle></CardHeader>
            <CardContent className="flex justify-center items-center py-10">
              <Loader2 className="h-12 w-12 animate-spin text-primary" />
            </CardContent>
@@ -66,10 +64,10 @@ export default function AdvisorPage() {
     <div className="container mx-auto px-0 py-0 space-y-6">
       <div className="flex items-center gap-4">
         <Sparkles className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">{t('aiFinancialAdvisor')}</h1>
+        <h1 className="text-3xl font-bold">AI Financial Advisor</h1>
       </div>
       <p className="text-muted-foreground">
-        {t('leverageAI')}
+        Leverage artificial intelligence to get personalized financial insights and saving tips.
       </p>
 
       <div className="grid gap-6 md:grid-cols-1">
@@ -78,7 +76,7 @@ export default function AdvisorPage() {
       
       <Card className="mt-6 shadow-lg">
         <CardHeader>
-          <CardTitle>{t('understandingAdvisor')}</CardTitle>
+          <CardTitle>Understanding Your AI Advisor</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row items-center gap-6">
           <Image 
@@ -91,10 +89,10 @@ export default function AdvisorPage() {
           />
           <div>
             <p className="text-muted-foreground mb-2">
-              {t('aiAnalysisDescription')}
+              Our AI analyzes your spending habits, income, and financial goals to provide tailored advice. The more information you provide (especially in Settings) and the more consistently you track your expenses, the smarter and more helpful your AI advisor becomes.
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>{t('privacyNote').split(':')[0]}:</strong> {t('privacyNote').split(':')[1]}
+              <strong>Privacy Note:</strong> Your financial data is processed securely. We are committed to protecting your privacy.
             </p>
           </div>
         </CardContent>

@@ -11,10 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 
 export function SignupForm() {
-  const t = useTranslations('SignupForm');
   const { isLoading: authIsLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -34,8 +32,8 @@ export function SignupForm() {
     } catch (error) {
       console.error("Google Sign-Up failed", error);
       toast({
-        title: t('signupFailedTitle'),
-        description: t('signupFailedGoogle'),
+        title: "Signup Failed",
+        description: "Could not sign up with Google. Please try again.",
         variant: 'destructive',
       });
     } finally {
@@ -46,7 +44,7 @@ export function SignupForm() {
   const handleCredentialsSignUp = async (event) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      toast({ title: 'Error', description: t('passwordsDoNotMatch'), variant: 'destructive' });
+      toast({ title: 'Error', description: "Passwords do not match.", variant: 'destructive' });
       return;
     }
     setIsSubmitting(true);
@@ -60,7 +58,7 @@ export function SignupForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || t('registrationFailed'));
+        throw new Error(data.error || "Failed to register");
       }
 
       const signInResult = await signIn('credentials', {
@@ -70,17 +68,17 @@ export function SignupForm() {
       });
 
       if (signInResult?.error) {
-        toast({ title: t('registrationSuccessfulLoginFailed'), description: signInResult.error, variant: 'destructive' });
+        toast({ title: "Registration successful, but login failed", description: signInResult.error, variant: 'destructive' });
         router.push('/login'); 
       } else if (signInResult?.ok) {
-        toast({ title: t('accountCreatedTitle'), description: t('accountCreatedDescription') });
+        toast({ title: "Account Created!", description: "Welcome to Finly! Redirecting to dashboard..." });
         router.push('/dashboard'); 
       }
     } catch (error) {
       console.error("Credentials Sign-Up failed", error);
       toast({
-        title: t('signupFailedTitle'),
-        description: error.message || t('signupFailedGoogle'), // Assuming general error if not specific
+        title: "Signup Failed",
+        description: error.message || "Could not sign up with Google. Please try again.",
         variant: 'destructive',
       });
     } finally {
@@ -94,29 +92,29 @@ export function SignupForm() {
     <Card className="shadow-xl w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl flex items-center gap-2">
-          <UserPlus className="h-7 w-7 text-primary" /> {t('createAccountTitle')}
+          <UserPlus className="h-7 w-7 text-primary" /> Create your Finly Account
         </CardTitle>
-        <CardDescription>{t('joinFinlyDescription')}</CardDescription>
+        <CardDescription>Join Finly to start managing your finances.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleCredentialsSignUp} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">{t('nameLabel')}</Label>
+            <Label htmlFor="name">Name (Optional)</Label>
             <Input
               id="name"
               type="text"
-              placeholder={t('namePlaceholder')}
+              placeholder="Your Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="signup-email">{t('emailLabel')}</Label>
+            <Label htmlFor="signup-email">Email</Label>
             <Input
               id="signup-email"
               type="email"
-              placeholder={t('emailPlaceholder')}
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -124,11 +122,11 @@ export function SignupForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="signup-password">{t('passwordLabel')}</Label>
+            <Label htmlFor="signup-password">Password</Label>
             <Input
               id="signup-password"
               type="password"
-              placeholder={t('passwordPlaceholder')}
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -137,11 +135,11 @@ export function SignupForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">{t('confirmPasswordLabel')}</Label>
+            <Label htmlFor="confirm-password">Confirm Password</Label>
             <Input
               id="confirm-password"
               type="password"
-              placeholder={t('passwordPlaceholder')}
+              placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -151,7 +149,7 @@ export function SignupForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             <UserPlus className="mr-2 h-5 w-5" />
-            {isSubmitting ? t('creatingAccountButton') : t('createAccountButton')}
+            {isSubmitting ? "Creating Account..." : "Create Account"}
           </Button>
         </form>
 
@@ -161,21 +159,21 @@ export function SignupForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              {t('orSignUpWith')}
+              Or sign up with
             </span>
           </div>
         </div>
 
         <Button onClick={handleGoogleSignUp} variant="outline" className="w-full" disabled={isLoading}>
           <Chrome className="mr-2 h-5 w-5" />
-          {isGoogleLoading ? t('redirectingGoogle') : t('signUpWithGoogle')}
+          {isGoogleLoading ? "Redirecting..." : "Sign up with Google"}
         </Button>
       </CardContent>
       <CardFooter className="text-center text-sm text-muted-foreground">
         <p>
-          {t('alreadyHaveAccount')}{' '}
+          Already have an account?{' '}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            {t('logInLink')}
+            Log in
           </Link>
         </p>
       </CardFooter>

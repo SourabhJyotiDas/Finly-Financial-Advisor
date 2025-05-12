@@ -25,19 +25,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-// import { useToast } from '@/hooks/use-toast'; // Toast is handled by parent
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 
 export function ExpenseForm({ onAddExpense }) {
-  const t = useTranslations('ExpenseForm');
-  // const { toast } = useToast(); // Parent component (ExpensesPage) handles toast
-
   const expenseSchema = z.object({
-    description: z.string().min(1, { message: t('validationDescriptionRequired') }),
-    amount: z.coerce.number().positive({ message: t('validationAmountPositive') }),
+    description: z.string().min(1, { message: "Description is required." }),
+    amount: z.coerce.number().positive({ message: "Amount must be positive." }),
     category: z.enum(['food', 'rent', 'transport', 'entertainment', 'utilities', 'other']),
-    date: z.date({ required_error: t('validationDateRequired') }),
+    date: z.date({ required_error: "Date is required." }),
   });
 
   const form = useForm({
@@ -79,12 +74,12 @@ export function ExpenseForm({ onAddExpense }) {
   }
 
   const categories = [
-    { value: 'food', label: t('categories.food') },
-    { value: 'rent', label: t('categories.rent') },
-    { value: 'transport', label: t('categories.transport') },
-    { value: 'entertainment', label: t('categories.entertainment') },
-    { value: 'utilities', label: t('categories.utilities') },
-    { value: 'other', label: t('categories.other') },
+    { value: 'food', label: "Food" },
+    { value: 'rent', label: "Rent/Mortgage" },
+    { value: 'transport', label: "Transport" },
+    { value: 'entertainment', label: "Entertainment" },
+    { value: 'utilities', label: "Utilities" },
+    { value: 'other', label: "Other" },
   ];
 
   return (
@@ -95,9 +90,9 @@ export function ExpenseForm({ onAddExpense }) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('descriptionLabel')}</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input placeholder={t('descriptionPlaceholder')} {...field} />
+                <Input placeholder="e.g., Groceries, Coffee" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,12 +104,12 @@ export function ExpenseForm({ onAddExpense }) {
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('amountLabel')}</FormLabel>
+                <FormLabel>Amount (₹)</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
                     step="0.01" 
-                    placeholder={t('amountPlaceholder')} 
+                    placeholder="0.00" 
                     {...field} 
                     value={field.value === undefined ? '' : field.value}
                     onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} 
@@ -129,11 +124,11 @@ export function ExpenseForm({ onAddExpense }) {
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('categoryLabel')}</FormLabel>
+                <FormLabel>Category</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} defaultValue="food">
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('selectCategoryPlaceholder')} />
+                      <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -152,7 +147,7 @@ export function ExpenseForm({ onAddExpense }) {
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>{t('dateLabel')}</FormLabel>
+              <FormLabel>Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -164,7 +159,7 @@ export function ExpenseForm({ onAddExpense }) {
                       )}
                       disabled={!isClient}
                     >
-                      {field.value instanceof Date ? format(field.value, 'PPP') : (isClient ? <span>{t('pickDate')}</span> : <span>{t('loadingDate')}</span>)}
+                      {field.value instanceof Date ? format(field.value, 'PPP') : (isClient ? <span>Pick a date</span> : <span>Loading date...</span>)}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -178,7 +173,7 @@ export function ExpenseForm({ onAddExpense }) {
                       disabled={(date) => date > clientToday || date < new Date('1900-01-01')}
                       initialFocus
                     />
-                  ) : <div className="p-4 text-center text-muted-foreground">{t('loadingCalendar')}</div> }
+                  ) : <div className="p-4 text-center text-muted-foreground">Loading calendar...</div> }
                 </PopoverContent>
               </Popover>
               <FormMessage />
@@ -186,7 +181,7 @@ export function ExpenseForm({ onAddExpense }) {
           )}
         />
         <Button type="submit" className="w-full" disabled={!isClient}>
-          <PlusCircle className="mr-2 h-4 w-4" /> {t('addExpenseButton')}
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
         </Button>
       </form>
     </Form>

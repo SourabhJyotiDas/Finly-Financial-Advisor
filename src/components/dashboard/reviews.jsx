@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 const Avatar = ({ name, src, alt }) => {
   const getInitials = (name) => {
@@ -24,7 +23,6 @@ const Avatar = ({ name, src, alt }) => {
 };
 
 export default function ReviewsList() {
-  const t = useTranslations('ReviewsList');
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
@@ -49,11 +47,11 @@ export default function ReviewsList() {
     <section className="text-gray-800 body-font ">
       <div className="container px-5 py-10 mx-auto">
         <h1 className="text-4xl font-semibold text-center  mb-12 text-gray-500 dark:text-gray-300">
-          {t('title')}
+          Reviews
         </h1>
 
         {reviews.length === 0 ? (
-          <p className="text-center w-full text-gray-800 dark:text-white text-lg">{t('noReviews')}</p>
+          <p className="text-center w-full text-gray-800 dark:text-white text-lg">No reviews yet.</p>
         ) : (
           <div className="flex flex-wrap -m-4">
             {reviews.map((review, index) => (

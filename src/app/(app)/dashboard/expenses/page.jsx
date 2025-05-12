@@ -14,11 +14,8 @@ import {
 import { ListChecks, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslations } from "next-intl";
 
 export default function ExpensesPage() {
-  const t = useTranslations("ExpensesPage");
-  const tDashboard = useTranslations("DashboardPage"); // For shared translations like error messages
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [expenses, setExpenses] = useState([]);
@@ -42,13 +39,13 @@ export default function ExpensesPage() {
       console.error("Error fetching data:", error);
       toast({
         title: "Error",
-        description: t("errorLoadingData"),
+        description: "Could not load your financial data.",
         variant: "destructive",
       });
     } finally {
       setIsFetchingData(false);
     }
-  }, [user, toast, t]);
+  }, [user, toast]);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -70,14 +67,14 @@ export default function ExpensesPage() {
       const newExpense = await response.json();
       setExpenses((prevExpenses) => [newExpense, ...prevExpenses]);
       toast({
-        title: tDashboard("expenseAdded"),
-        description: tDashboard("expenseAddedDesc", {description: newExpense.description }),
+        title: "Expense Added",
+        description: `${newExpense.description} added.`,
       });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: tDashboard("errorAddExpense"),
+        description: "Could not add expense.",
         variant: "destructive",
       });
     }
@@ -96,14 +93,14 @@ export default function ExpensesPage() {
         prevExpenses.filter((exp) => (exp._id || exp.id) !== expenseId)
       );
       toast({
-        title: tDashboard("expenseDeleted"),
-        description: tDashboard("expenseDeletedDesc"),
+        title: "Expense Deleted",
+        description: "Expense removed successfully.",
       });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: tDashboard("errorDeleteExpense"),
+        description: "Could not delete expense.",
         variant: "destructive",
       });
     }
@@ -114,11 +111,11 @@ export default function ExpensesPage() {
       <div className="container mx-auto px-0 py-0 space-y-6">
         <div className="flex items-center gap-4">
           <ListChecks className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">{t("manageExpenses")}</h1>
+          <h1 className="text-3xl font-bold">Manage Your Expenses</h1>
         </div>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>{t("loadingData")}</CardTitle>
+            <CardTitle>Loading Data...</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center items-center py-10">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -132,15 +129,15 @@ export default function ExpensesPage() {
     <div className="container mx-auto px-0 py-0 space-y-6">
       <div className="flex items-center gap-4">
         <ListChecks className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">{t("manageExpenses")}</h1>
+        <h1 className="text-3xl font-bold">Manage Your Expenses</h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>{t("addNewExpense")}</CardTitle>
+            <CardTitle>Add New Expense</CardTitle>
             <CardDescription>
-              {t("addNewExpenseDesc")}
+              Keep a detailed record of your spending.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -155,9 +152,9 @@ export default function ExpensesPage() {
 
       <Card className="shadow-lg mt-6">
         <CardHeader>
-          <CardTitle>{t("allExpenses")}</CardTitle>
+          <CardTitle>All Expenses</CardTitle>
           <CardDescription>
-            {t("allExpensesDesc")}
+            View and manage all your tracked expenses.
           </CardDescription>
         </CardHeader>
 

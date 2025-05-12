@@ -1,22 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Using next/navigation for basic routing
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTranslations } from 'next-intl';
-// import { usePathname } from 'next-intl/client'; // For locale-aware pathname if needed // Removed as it's unused and causing error
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const t = useTranslations('HomePage');
-  // const pathname = usePathname(); // Removed as it's unused
 
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        // next-intl middleware will handle prefixing based on current locale
         router.replace('/dashboard');
       } else {
         router.replace('/login');
@@ -31,7 +26,7 @@ export default function HomePage() {
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-10 w-1/2 mx-auto" />
-        <p className="text-center text-muted-foreground">{t('loadingFinly')}</p>
+        <p className="text-center text-muted-foreground">Loading Finly...</p>
       </div>
     </div>
   );

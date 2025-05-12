@@ -9,10 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth'; 
 import { Settings as SettingsIcon, Loader2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 
 export default function SettingsPage() {
-  const t = useTranslations('SettingsPage');
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
@@ -40,7 +38,7 @@ export default function SettingsPage() {
       setFinancialGoals(data.financialGoals ?? '');
     } catch (error) {
       console.error(error);
-      toast({ title: 'Error', description: t('errorLoadProfile'), variant: 'destructive' });
+      toast({ title: 'Error', description: "Could not load your profile data.", variant: 'destructive' });
       setName(user.name ?? user.email?.split('@')[0] ?? '');
       setIncome('');
       setFinancialGoals('');
@@ -48,7 +46,7 @@ export default function SettingsPage() {
       setIsFetchingProfile(false);
       setIsDirty(false);
     }
-  }, [user, toast, t]);
+  }, [user, toast]);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -69,7 +67,7 @@ export default function SettingsPage() {
 
   const handleSaveSettings = async () => {
     if (!user) {
-      toast({ title: 'Error', description: t('errorUserNotAuth'), variant: 'destructive' });
+      toast({ title: 'Error', description: "User not authenticated.", variant: 'destructive' });
       return;
     }
     setIsSaving(true);
@@ -98,11 +96,11 @@ export default function SettingsPage() {
       setIncome(savedProfile.income ?? '');
       setFinancialGoals(savedProfile.financialGoals ?? '');
 
-      toast({ title: t('settingsSaved'), description: t('settingsSavedDesc') });
+      toast({ title: "Settings Saved", description: "Your profile has been updated." });
       setIsDirty(false);
     } catch (error) {
       console.error(error);
-      toast({ title: t('errorSavingSettings'), description: error.message || t('errorSavingSettingsDesc'), variant: 'destructive' });
+      toast({ title: "Error Saving Settings", description: error.message || "Could not save your profile.", variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -113,10 +111,10 @@ export default function SettingsPage() {
       <div className="container mx-auto px-0 py-0 space-y-6">
          <div className="flex items-center gap-4">
            <SettingsIcon className="h-8 w-8 text-primary" />
-           <h1 className="text-3xl font-bold">{t('settings')}</h1>
+           <h1 className="text-3xl font-bold">Settings</h1>
          </div>
          <Card className="shadow-lg">
-           <CardHeader><CardTitle>{t('loadingProfile')}</CardTitle></CardHeader>
+           <CardHeader><CardTitle>Loading Profile...</CardTitle></CardHeader>
            <CardContent className="space-y-4">
              <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
            </CardContent>
@@ -129,40 +127,40 @@ export default function SettingsPage() {
     <div className="container mx-auto px-0 py-0 space-y-6">
       <div className="flex items-center gap-4">
         <SettingsIcon className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">{t('settings')}</h1>
+        <h1 className="text-3xl font-bold">Settings</h1>
       </div>
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>{t('userProfile')}</CardTitle>
-          <CardDescription>{t('userProfileDesc')}</CardDescription>
+          <CardTitle>User Profile</CardTitle>
+          <CardDescription>Manage your personal information and financial settings. Your changes will be saved to your account.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">{t('nameLabel')}</Label>
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               type="text"
-              placeholder={t('namePlaceholder')}
+              placeholder="Your Name"
               value={name}
               onChange={handleInputChange(setName)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="income">{t('incomeLabel')}</Label>
+            <Label htmlFor="income">Monthly Income (₹)</Label>
             <Input
               id="income"
               type="number"
-              placeholder={t('incomePlaceholder')}
+              placeholder="e.g., 50000"
               value={income}
               onChange={handleIncomeChange}
               step="any"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="financialGoals">{t('financialGoalsLabel')}</Label>
+            <Label htmlFor="financialGoals">Financial Goals</Label>
             <Textarea
               id="financialGoals"
-              placeholder={t('financialGoalsPlaceholder')}
+              placeholder="e.g., Save for a vacation, build emergency fund"
               value={financialGoals}
               onChange={handleInputChange(setFinancialGoals)}
               rows={3}
@@ -170,7 +168,7 @@ export default function SettingsPage() {
           </div>
           <Button onClick={handleSaveSettings} disabled={isSaving || !isDirty} className="w-full">
             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {isSaving ? t('savingSettingsButton') : t('saveSettingsButton')}
+            {isSaving ? "Saving..." : "Save Settings"}
           </Button>
         </CardContent>
       </Card>

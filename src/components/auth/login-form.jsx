@@ -12,10 +12,8 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Separator } from '../ui/separator';
-import { useTranslations } from 'next-intl';
 
 export function LoginForm() {
-  const t = useTranslations('LoginForm');
   const { isLoading: authIsLoading } = useAuth(); 
   const { toast } = useToast();
   const router = useRouter();
@@ -28,13 +26,12 @@ export function LoginForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true); 
     try {
-      // next-intl middleware handles locale for callbackUrl
       await signIn('google', { callbackUrl: '/dashboard' });
     } catch (error) {
       console.error("Google Sign-In failed", error);
       toast({
-        title: t('loginFailedTitle'),
-        description: t('loginFailedGoogle'),
+        title: "Login Failed",
+        description: "Could not sign in with Google. Please try again.",
         variant: 'destructive',
       });
     } finally {
@@ -55,15 +52,14 @@ export function LoginForm() {
       if (result?.error) {
         throw new Error(result.error);
       }
-      // next-intl middleware handles locale for callbackUrl
       router.push('/dashboard'); 
-      toast({ title: t('loginSuccessfulTitle'), description: t('loginSuccessfulDescription') });
+      toast({ title: "Login Successful", description: "Welcome back!" });
       
     } catch (error) {
       console.error("Credentials Sign-In failed", error);
       toast({
-        title: t('loginFailedTitle'),
-        description: error.message.includes("No user found") || error.message.includes("Incorrect password") ? t('loginFailedCredentials') : (error.message || t('loginUnknownError')),
+        title: "Login Failed",
+        description: error.message.includes("No user found") || error.message.includes("Incorrect password") ? "Invalid email or password. Please try again." : (error.message || "An unknown error occurred during login."),
         variant: 'destructive',
       });
     } finally {
@@ -76,17 +72,17 @@ export function LoginForm() {
   return (
     <Card className="shadow-xl w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-2xl">{t('welcomeBack')}</CardTitle>
-        <CardDescription>{t('signInToAccess')}</CardDescription>
+        <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+        <CardDescription>Sign in to access your Finly dashboard.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleCredentialsSignIn} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t('emailLabel')}</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
-              placeholder={t('emailPlaceholder')}
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -94,11 +90,11 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">{t('passwordLabel')}</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
-              placeholder={t('passwordPlaceholder')}
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -107,7 +103,7 @@ export function LoginForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
             <LogIn className="mr-2 h-5 w-5" />
-            {isCredentialsLoading ? t('signingInButton') : t('signInButton')}
+            {isCredentialsLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
         
@@ -117,21 +113,21 @@ export function LoginForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              {t('orContinueWith')}
+              Or continue with
             </span>
           </div>
         </div>
 
         <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading || isCredentialsLoading}>
           <Chrome className="mr-2 h-5 w-5" />
-          {isGoogleLoading ? t('redirectingGoogle') : t('signInWithGoogle')}
+          {isGoogleLoading ? "Redirecting..." : "Sign in with Google"}
         </Button>
       </CardContent>
       <CardFooter className="text-center text-sm text-muted-foreground">
         <p>
-          {t('dontHaveAccount')}{' '}
+          Don't have an account?{' '}
           <Link href="/signup" className="font-medium text-primary hover:underline">
-            {t('signUpLink')}
+            Sign up
           </Link>
         </p>
       </CardFooter>

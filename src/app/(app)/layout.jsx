@@ -1,23 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Using next/navigation for basic routing
+import { useRouter } from 'next/navigation';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTranslations } from 'next-intl';
 
 export default function AuthenticatedAppLayout({
   children,
 }) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const t = useTranslations('AuthenticatedAppLayout');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/login'); // next-intl middleware will handle prefixing
+      router.replace('/login');
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -29,7 +27,7 @@ export default function AuthenticatedAppLayout({
           <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-8 w-full" />
-          <p className="text-center text-muted-foreground">{t('loadingScreen')}</p>
+          <p className="text-center text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );
